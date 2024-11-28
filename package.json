@@ -9,7 +9,9 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onCommand:extension.enhanceSKey"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
@@ -22,7 +24,7 @@
       {
         "command": "extension.enhanceSKey",
         "key": "s",
-        "when": "vim.mode == normal"
+        "when": "vim.mode == Normal"
       }
     ]
   },
