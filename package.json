@@ -14,12 +14,15 @@
   "contributes": {
     "commands": [
       {
-        "command": "vscode-vim-enhanced.enhancedSneak",
-        "title": "enhanced sneak"
-      },
+        "command": "extension.enhanceSKey",
+        "title": "Enhance Vim S Key"
+      }
+    ],
+    "keybindings": [
       {
-        "command": "vscode-vim-enhanced.enhancedFind",
-        "title": "enhanced find"
+        "command": "extension.enhanceSKey",
+        "key": "s",
+        "when": "vim.mode == normal"
       }
     ]
   },
