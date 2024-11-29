@@ -1,37 +1,33 @@
 // src/extension.ts
 import * as vscode from "vscode";
+import type { VimAPI, ISneakStartEvent, ISneakEndEvent } from "./types/vim";
 
 let decorationType: vscode.TextEditorDecorationType | undefined;
 let decorations: vscode.DecorationOptions[] = [];
 let outputChannel: vscode.OutputChannel;
 let highlightedLine: number | null = null;
 
-export function activate(context: vscode.ExtensionContext) {
-  const vimExtension = vscode.extensions.getExtension("vscodevim.vim");
-
-  if (vimExtension) {
-    // 激活 Vim 扩展
-    vimExtension.activate().then(
-      (api) => {
-        if (api) {
-          // 订阅 SneakForward 事件
-          subscribeToVimEvents(api, context);
-        } else {
-          outputChannel.appendLine("无法激活 Vim 扩展的 API。");
-        }
-      },
-      (err) => {
-        // 使用 then 的第二个参数处理错误
-        outputChannel.appendLine(`激活 Vim 扩展失败: ${err}`);
-      }
-    );
-  } else {
-    outputChannel.appendLine("Vim 扩展未找到");
-  }
-
+export async function activate(context: vscode.ExtensionContext) {
   // 创建 Output Channel
   outputChannel = vscode.window.createOutputChannel("Vim Enhanced Output");
   outputChannel.appendLine("Vim Enhanced Extension Activated.");
+
+  const vimExtension = vscode.extensions.getExtension<VimAPI>("vscodevim.vim");
+
+  if (vimExtension) {
+    if (!vimExtension.isActive) {
+      await vimExtension.activate();
+    }
+    const api = vimExtension.exports;
+    if (api && isVimAPI(api)) {
+      // 订阅 SneakForward 事件
+      subscribeToVimEvents(api, context);
+    } else {
+      outputChannel.appendLine("无法访问 Vim 扩展的 API。");
+    }
+  } else {
+    outputChannel.appendLine("未找到 Vim 扩展。");
+  }
 
   // 注册增强 S 键命令
   let enhanceSKeyDisposable = vscode.commands.registerCommand(
@@ -62,6 +58,13 @@ export function activate(context: vscode.ExtensionContext) {
     enhanceSKeyDisposable,
     removeHighlightDisposable,
     selectionChangeDisposable
+  );
+}
+
+function isVimAPI(api: any): api is VimAPI {
+  return (
+    typeof api.onSneakForwardStart === 'function' &&
+    typeof api.onSneakForwardEnd === 'function'
   );
 }
 
@@ -162,22 +165,26 @@ function handleSelectionChange(event: vscode.TextEditorSelectionChangeEvent) {
 //   );
 // }
 
-function subscribeToVimEvents(api: any, context: vscode.ExtensionContext) {
-  // 订阅 onSneakForwardStart 事件
-  const startDisposable = api.onSneakForwardStart.event((data: { keysPressed: string[] }) => {
-    outputChannel.appendLine(`Sneak Forward Started with keys: ${data.keysPressed.join(", ")}`);
+// ... existing code ...
+function subscribeToVimEvents(api: VimAPI, context: vscode.ExtensionContext) {
+  // 正确的实现
+  const startDisposable = api.onSneakForwardStart((data: ISneakStartEvent) => {
+    outputChannel.appendLine(
+      `Sneak Forward Started with keys: ${data.keysPressed.join(", ")}`
+    );
     handleEnhanceSKey();
   });
 
-  // 订阅 onSneakForwardEnd 事件
-  const endDisposable = api.onSneakForwardEnd.event((data: { line: number; searchString: string }) => {
-    outputChannel.appendLine(`Sneak Forward Ended at line: ${data.line}, searchString: "${data.searchString}"`);
+  const endDisposable = api.onSneakForwardEnd((data: ISneakEndEvent) => {
+    outputChannel.appendLine(
+      `Sneak Forward Ended at line: ${data.line}, searchString: "${data.searchString}"`
+    );
     handleRemoveHighlight();
   });
 
-  // 将订阅添加到 context 以便在扩展卸载时自动取消订阅
   context.subscriptions.push(startDisposable, endDisposable);
 }
+// ... existing code ...
 
 export function deactivate() {
   if (decorationType) {

@@ -10,7 +10,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:extension.enhanceSKey"
+    "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -22,18 +22,6 @@
       {
         "command": "extension.removeEnhanceSKeyHighlight",
         "title": "Remove Enhance S Key Highlight"
-      }
-    ],
-    "keybindings": [
-      {
-        "command": "extension.enhanceSKey",
-        "key": "s",
-        "when": "vim.mode == Normal"
-      },
-      {
-        "command": "extension.removeEnhanceSKeyHighlight",
-        "key": "esc",
-        "when": "enhanceSKeyActive && vim.mode == Normal"
       }
     ]
   },
