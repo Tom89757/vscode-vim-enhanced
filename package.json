@@ -20,8 +20,12 @@
         "title": "Enhance Vim S Key"
       },
       {
-        "command": "extension.removeEnhanceSKeyHighlight",
-        "title": "Remove Enhance S Key Highlight"
+        "command": "extension.enhanceFKey",
+        "title": "Enhance Vim F Key"
+      },
+      {
+        "command": "extension.removeEnhanceKeyHighlight",
+        "title": "Remove Enhance Key Highlight"
       }
     ]
   },

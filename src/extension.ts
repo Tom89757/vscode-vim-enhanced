@@ -1,6 +1,12 @@
 // src/extension.ts
 import * as vscode from "vscode";
-import type { VimAPI, ISneakStartEvent, ISneakEndEvent } from "./types/vim";
+import type {
+  VimAPI,
+  ISneakStartEvent,
+  ISneakEndEvent,
+  IFindStartEvent,
+  IFindEndEvent,
+} from "./types/vim";
 
 let decorationType: vscode.TextEditorDecorationType | undefined;
 let decorations: vscode.DecorationOptions[] = [];
@@ -37,9 +43,17 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  // 注册增强 F 键命令
+  let enhanceFKeyDisposable = vscode.commands.registerCommand(
+    "extenstion.enhanceFKey",
+    () => {
+      handleEnhanceFKey();
+    }
+  );
+
   // 注册移除高亮命令
   let removeHighlightDisposable = vscode.commands.registerCommand(
-    "extension.removeEnhanceSKeyHighlight",
+    "extension.removeEnhanceKeyHighlight",
     () => {
       handleRemoveHighlight();
     }
@@ -56,6 +70,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     enhanceSKeyDisposable,
+    enhanceFKeyDisposable,
     removeHighlightDisposable,
     selectionChangeDisposable
   );
@@ -63,8 +78,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
 function isVimAPI(api: any): api is VimAPI {
   return (
-    typeof api.onSneakForwardStart === 'function' &&
-    typeof api.onSneakForwardEnd === 'function'
+    typeof api.onSneakForwardStart === "function" &&
+    typeof api.onSneakForwardEnd === "function"
   );
 }
 
@@ -109,9 +124,50 @@ function handleEnhanceSKey() {
     );
     vscode.commands.executeCommand("setContext", "enhanceSKeyActive", true);
     highlightedLine = lineNumber;
+  }
+}
 
-    //触发Vim扩展的's'命令
-    // triggerVimSCommand();
+function handleEnhanceFKey() {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    outputChannel.appendLine("No active editor found.");
+    return;
+  }
+
+  const document = editor.document;
+  const position = editor.selection.active;
+  const lineNumber = position.line;
+  const lineText = document.lineAt(lineNumber).text;
+
+  outputChannel.appendLine(`Enhancing 'f' key at line ${lineNumber + 1}.`);
+
+  //定义需要高亮的字符模式，例如字幕'f'
+  const regex = /f/g;
+  let match;
+  decorations = [];
+
+  while ((match = regex.exec(lineText)) !== null) {
+    const startPos = new vscode.Position(lineNumber, match.index);
+    const endPos = new vscode.Position(lineNumber, match.index + 1);
+    const decoration = { range: new vscode.Range(startPos, endPos) };
+    decorations.push(decoration);
+    outputChannel.appendLine(`Found 'f' at position ${match.index}.`);
+  }
+
+  if (decorations.length === 0) {
+    outputChannel.appendLine("No 'f' characters found to highlight.");
+  } else {
+    decorationType = vscode.window.createTextEditorDecorationType({
+      backgroundColor: "rgba(0, 255, 0, 0.3", //半透明绿色背景
+      border: "1px solid green",
+    });
+
+    editor.setDecorations(decorationType, decorations);
+    outputChannel.appendLine(
+      `Highlighted ${decorations.length} 'f' characters.`
+    );
+    vscode.commands.executeCommand("setContext", "enhanceFKeyActive", true);
+    highlightedLine = lineNumber;
   }
 }
 
@@ -125,7 +181,9 @@ function handleRemoveHighlight() {
     highlightedLine = null;
 
     vscode.commands.executeCommand("setContext", "enhanceSKeyActive", false);
+    vscode.commands.executeCommand("setContext", "enhanceFKeyActive", false);
     outputChannel.appendLine("Removed 'e' character highlights.");
+    outputChannel.appendLine("Removed 'f' character highlights.");
   } else {
     outputChannel.appendLine("No highlights to remove.");
   }
@@ -146,7 +204,7 @@ function handleSelectionChange(event: vscode.TextEditorSelectionChangeEvent) {
         currentLine + 1
       }. Removing highlights.`
     );
-    vscode.commands.executeCommand("extension.removeEnhanceSKeyHighlight");
+    vscode.commands.executeCommand("extension.removeEnhanceKeyHighlight");
   }
 }
 
@@ -167,7 +225,7 @@ function handleSelectionChange(event: vscode.TextEditorSelectionChangeEvent) {
 
 // ... existing code ...
 function subscribeToVimEvents(api: VimAPI, context: vscode.ExtensionContext) {
-  // 正确的实现
+  // 订阅SneakForward事件
   const startDisposable = api.onSneakForwardStart((data: ISneakStartEvent) => {
     outputChannel.appendLine(
       `Sneak Forward Started with keys: ${data.keysPressed.join(", ")}`
@@ -182,7 +240,29 @@ function subscribeToVimEvents(api: VimAPI, context: vscode.ExtensionContext) {
     handleRemoveHighlight();
   });
 
-  context.subscriptions.push(startDisposable, endDisposable);
+  // 订阅FindForward事件
+  const findStartDisposable = api.onFindForwardStart(
+    (data: IFindStartEvent) => {
+      outputChannel.appendLine(
+        `Find Forward Ended with keys: ${data.keysPressed.join(", ")}`
+      );
+      handleEnhanceFKey();
+    }
+  );
+
+  const findEndDisposable = api.onFindForwardEnd((data: IFindEndEvent) => {
+    outputChannel.appendLine(
+      `Sneak Forward Ended at line: ${data.position.line}, searchString: "${data.searchChar}"`
+    );
+    handleRemoveHighlight();
+  });
+
+  context.subscriptions.push(
+    startDisposable,
+    endDisposable,
+    findStartDisposable,
+    findEndDisposable
+  );
 }
 // ... existing code ...
 
