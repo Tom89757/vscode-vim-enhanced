@@ -230,9 +230,6 @@ function handleSelectionSChange(event: vscode.TextEditorSelectionChangeEvent) {
   }
 
   if (highlightedLineS !== null) {
-    // outputChannel.appendLine(`当前光标所在行（从事件中获取）：${currentLine}`);
-    // outputChannel.appendLine(`高亮的 S 键行：${highlightedLineS}`);
-
     setTimeout(() => {
       const editor = vscode.window.activeTextEditor;
       if (!editor) return;
@@ -240,13 +237,12 @@ function handleSelectionSChange(event: vscode.TextEditorSelectionChangeEvent) {
 
       // 调试日志
       // outputChannel.appendLine(`Event Current Line: ${currentLine + 1}`);
-      outputChannel.appendLine(`Actual Current Line: ${actualCurrentLine}+1`);
-      outputChannel.appendLine(
-        `Highlighted Line S: ${
-          highlightedLineS == null ? highlightedLineS : highlightedLineS + 1
-        }`
-      );
-      outputChannel.appendLine("-----------------------------------");
+      // outputChannel.appendLine(`Actual Current Line: ${actualCurrentLine}+1`);
+      // outputChannel.appendLine(
+      //   `Highlighted Line S: ${
+      //     highlightedLineS == null ? highlightedLineS : highlightedLineS + 1
+      //   }`
+      // );
 
       if (highlightedLineS !== null && highlightedLineS !== actualCurrentLine) {
         outputChannel.appendLine(
@@ -272,9 +268,6 @@ function handleSelectionFChange(event: vscode.TextEditorSelectionChangeEvent) {
   }
 
   if (highlightedLineF !== null) {
-    // outputChannel.appendLine(`当前光标所在行（从事件中获取）：${currentLine}`);
-    // outputChannel.appendLine(`高亮的 S 键行：${highlightedLineS}`);
-
     setTimeout(() => {
       const editor = vscode.window.activeTextEditor;
       if (!editor) return;
@@ -282,13 +275,12 @@ function handleSelectionFChange(event: vscode.TextEditorSelectionChangeEvent) {
 
       // 调试日志
       // outputChannel.appendLine(`Event Current Line: ${currentLine + 1}`);
-      outputChannel.appendLine(`Actual Current Line: ${actualCurrentLine}+1`);
-      outputChannel.appendLine(
-        `Highlighted Line F: ${
-          highlightedLineF == null ? highlightedLineF : highlightedLineF + 1
-        }`
-      );
-      outputChannel.appendLine("-----------------------------------");
+      // outputChannel.appendLine(`Actual Current Line: ${actualCurrentLine}+1`);
+      // outputChannel.appendLine(
+      //   `Highlighted Line F: ${
+      //     highlightedLineF == null ? highlightedLineF : highlightedLineF + 1
+      //   }`
+      // );
 
       if (highlightedLineF !== null && highlightedLineF !== actualCurrentLine) {
         outputChannel.appendLine(
