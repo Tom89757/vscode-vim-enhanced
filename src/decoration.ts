@@ -61,10 +61,10 @@ export class DecorationConfig {
 
 export const updateDecorationConfig = () => {
   const settings = vscode.workspace.getConfiguration();
-  const fontWeight = settings.get("vimFindHighlight.charFontWeight");
-  const primaryColor = settings.get("vimFindHighlight.charPrimaryColor");
-  const secondaryColor = settings.get("vimFindHighlight.charSecondaryColor");
-  const underline = settings.get("vimFindHighlight.enableUnderline");
+  const fontWeight = settings.get("vscodeVimEnhanced.charFontWeight");
+  const primaryColor = settings.get("vscodeVimEnhanced.charPrimaryColor");
+  const secondaryColor = settings.get("vscodeVimEnhanced.charSecondaryColor");
+  const underline = settings.get("vscodeVimEnhanced.enableUnderline");
   decorationConfig.firstColor = primaryColor as string;
   decorationConfig.secondColor = secondaryColor as string;
   decorationConfig.fontWeight = fontWeight as string;

@@ -28,7 +28,7 @@ export interface LineWords {
   afterCursor: WordWithIndexWithCompareFunc[];
 }
 
-export class CharHighlighter implements ICharHighlighter {
+export class FCharHighlighter implements ICharHighlighter {
   public getCharHighlightingAfterCursor(
     lineText: string,
     cursorPos: number
@@ -168,3 +168,5 @@ const isAlphabetic = (str: string) => {
   const wordRegex = /\w/gi;
   return wordRegex.test(str);
 };
+
+export const fCharHighlighter = new FCharHighlighter();

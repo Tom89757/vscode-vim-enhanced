@@ -14,21 +14,62 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "vscodeVimEnhanced",
+      "properties": {
+        "vscodeVimEnhanced.charPrimaryColor": {
+          "type": "string",
+          "default": "red",
+          "description": "The color of the char that can be reached with the f motion within one jump"
+        },
+        "vscodeVimEnhanced.charSecondaryColor": {
+          "type": "string",
+          "default": "green",
+          "description": "The color of the char that can be reached with the f motion with more than one jump"
+        },
+        "vscodeVimEnhanced.charFontWeight": {
+          "type": "string",
+          "default": "400",
+          "description": "The font weight of the char that can be reached with the f motion",
+          "enum": [
+            "100",
+            "200",
+            "300",
+            "400",
+            "500",
+            "600",
+            "700",
+            "800",
+            "900"
+          ]
+        },
+        "vscodeVimEnhanced.enableUnderline": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, a line will be drawn under the highlighted characters"
+        },
+        "vscodeVimEnhanced.enableAutoHighlight": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, the extension will automatically highlight the characters that can be reached with the f motion"
+        }
+      }
+    },
     "commands": [
       {
-        "command": "extension.enhanceSKey",
+        "command": "vscodeVimEnhanced.enhanceSKey",
         "title": "Enhance Vim S Key"
       },
       {
-        "command": "extension.enhanceFKey",
+        "command": "vscodeVimEnhanced.enhanceFKey",
         "title": "Enhance Vim F Key"
       },
       {
-        "command": "extension.removeEnhanceSKeyHighlight",
+        "command": "vscodeVimEnhanced.removeEnhanceSKeyHighlight",
         "title": "Remove Enhance S Key Highlight"
       },
       {
-        "command": "extension.removeEnhanceFKeyHighlight",
+        "command": "vscodeVimEnhanced.removeEnhanceFKeyHighlight",
         "title": "Remove Enhance F Key Highlight"
       }
     ]

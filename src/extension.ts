@@ -8,6 +8,14 @@ import type {
   IFindEndEvent,
 } from "./types/vim";
 
+import { fCharHighlighter } from "./FCharHighighlighter";
+import {
+  decorationConfig,
+  disposeCharDecoration,
+  updateDecorationConfig,
+} from "./decoration";
+import { colorChars, getCurrentLine, getCursorPos } from "./utils";
+
 let decorationTypeS: vscode.TextEditorDecorationType | undefined;
 let decorationsS: vscode.DecorationOptions[] = [];
 let highlightedLineS: number | null = null;
@@ -42,7 +50,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // 注册增强 S 键命令
   let enhanceSKeyDisposable = vscode.commands.registerCommand(
-    "extension.enhanceSKey",
+    "vscodeVimEnhanced.enhanceSKey",
     () => {
       handleEnhanceSKey();
     }
@@ -50,7 +58,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // 注册增强 F 键命令
   let enhanceFKeyDisposable = vscode.commands.registerCommand(
-    "extension.enhanceFKey",
+    "vscodeVimEnhanced.enhanceFKey",
     () => {
       handleEnhanceFKey();
     }
@@ -58,14 +66,14 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // 注册移除高亮命令
   let removeSHighlightDisposable = vscode.commands.registerCommand(
-    "extension.removeEnhanceSKeyHighlight",
+    "vscodeVimEnhanced.removeEnhanceSKeyHighlight",
     () => {
       handleRemoveSHighlight();
     }
   );
 
   let removeFHighlightDisposable = vscode.commands.registerCommand(
-    "extension.removeEnhanceFKeyHighlight",
+    "vscodeVimEnhanced.removeEnhanceFKeyHighlight",
     () => {
       handleRemoveFHighlight();
     }
@@ -185,8 +193,25 @@ function handleEnhanceFKey() {
     );
     vscode.commands.executeCommand("setContext", "enhanceFKeyActive", true);
     highlightedLineF = lineNumber;
+
+    //高亮目标字符
+    const line = getCurrentLine();
+    const cursorPos = getCursorPos();
+    if (line?.text.length && cursorPos != undefined) {
+      mainF(cursorPos, line.text);
+    } else {
+      disposeCharDecoration();
+    }
   }
 }
+
+const mainF = (cursorPos: number, currentLine: string) => {
+  const toColor = fCharHighlighter.getCharHighlightingAfterCursor(
+    currentLine,
+    cursorPos
+  );
+  colorChars(toColor, decorationConfig);
+};
 
 function handleRemoveSHighlight() {
   const editor = vscode.window.activeTextEditor;
@@ -250,7 +275,9 @@ function handleSelectionSChange(event: vscode.TextEditorSelectionChangeEvent) {
             actualCurrentLine + 1
           }. Removing 'e' highlights.`
         );
-        vscode.commands.executeCommand("extension.removeEnhanceSKeyHighlight");
+        vscode.commands.executeCommand(
+          "vscodeVimEnhanced.removeEnhanceSKeyHighlight"
+        );
       }
     }, 0);
 
@@ -288,7 +315,9 @@ function handleSelectionFChange(event: vscode.TextEditorSelectionChangeEvent) {
             actualCurrentLine + 1
           }. Removing 'f' highlights.`
         );
-        vscode.commands.executeCommand("extension.removeEnhanceFKeyHighlight");
+        vscode.commands.executeCommand(
+          "vscodeVimEnhanced.removeEnhanceFKeyHighlight"
+        );
       }
     }, 0);
 
