@@ -14,7 +14,7 @@ import {
   disposeCharDecoration,
   updateDecorationConfig,
 } from "./decoration";
-import { colorChars2, getCurrentLine, getCursorPos } from "./utils";
+import { colorChars, getCurrentLine, getCursorPos } from "./utils";
 
 let decorationTypeS: vscode.TextEditorDecorationType | undefined;
 let decorationsS: vscode.DecorationOptions[] = [];
@@ -186,22 +186,22 @@ function handleEnhanceFKey() {
       backgroundColor: "rgba(255, 255, 0, 0.3)", // 半透明黄色背景
       border: "1px solid yellow",
     });
-
     editor.setDecorations(decorationTypeF, decorationsF);
     outputChannel.appendLine(
       `Highlighted ${decorationsF.length} 'f' characters.`
     );
     vscode.commands.executeCommand("setContext", "enhanceFKeyActive", true);
     highlightedLineF = lineNumber;
+  }
 
-    //高亮目标字符
-    const line = getCurrentLine();
-    const cursorPos = getCursorPos();
-    if (line?.text.length && cursorPos != undefined) {
-      mainF(cursorPos, line.text);
-    } else {
-      disposeCharDecoration();
-    }
+  //高亮目标字符
+  const line = getCurrentLine();
+  const cursorPos = getCursorPos();
+  if (line?.text.length && cursorPos != undefined) {
+    mainF(cursorPos, line.text);
+  } else {
+    outputChannel.appendLine("disposeCharDecoration() in handleEnhanceFKey()");
+    disposeCharDecoration();
   }
 }
 
@@ -215,9 +215,11 @@ const mainF = (cursorPos: number, currentLine: string) => {
   outputChannel.appendLine(`toColor: ${JSON.stringify(toColor)}`);
 
   // 输出 decorationConfig 的内容到 outputChannel
-  outputChannel.appendLine(`decorationConfig: ${JSON.stringify(decorationConfig)}`);
+  outputChannel.appendLine(
+    `decorationConfig: ${JSON.stringify(decorationConfig)}`
+  );
 
-  colorChars2(toColor, decorationConfig);
+  colorChars(toColor, decorationConfig);
 };
 
 function handleRemoveSHighlight() {
@@ -250,6 +252,11 @@ function handleRemoveFHighlight() {
   } else {
     outputChannel.appendLine("No char 'f' highlights to remove.");
   }
+
+  outputChannel.appendLine(
+    "disposeCharDecoration() in handleRemoveFHighlight()"
+  );
+  disposeCharDecoration();
 }
 
 function handleSelectionSChange(event: vscode.TextEditorSelectionChangeEvent) {

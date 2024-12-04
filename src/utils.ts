@@ -45,46 +45,17 @@ export const colorChars = (
     const startPos = createPosition(line.lineNumber, word.position);
     const endPos = createPosition(line.lineNumber, word.position + 1);
 
+    // create a decoration with the underline type and the specified position
+    const decoration: vscode.DecorationOptions = {
+      range: new vscode.Range(startPos, endPos),
+    };
 
-  }
-};
-
-export const colorChars2 = (
-  toColor: CharColoring[],
-  decorationConfig: DecorationConfig
-) => {
-  const editor = getActiveEditor();
-  if (!editor) {
-    return;
-  }
-
-  const firstColorDecorations: vscode.DecorationOptions[] = [];
-  const secondColorDecorations: vscode.DecorationOptions[] = [];
-
-  const createPosition = (line: number, char: number) =>
-    new vscode.Position(line, char);
-
-  const line = getCurrentLine();
-  if (!line) {
-    return;
-  }
-
-  for (const charInfo of toColor) {
-    const startPos = createPosition(line.lineNumber, charInfo.position);
-    const endPos = createPosition(line.lineNumber, charInfo.position + 1);
-    const decoration = { range: new vscode.Range(startPos, endPos) };
-    
-    // Apply first color decorations
-    firstColorDecorations.push(decoration);
-
-    // If needed, apply second color based on some condition
-    // For example:
-    if (charInfo.minTimesToReach > 1) {
+    if (word.minTimesToReach > 1) {
       secondColorDecorations.push(decoration);
+    } else {
+      firstColorDecorations.push(decoration);
     }
   }
-
-  // Apply first color decorations
   editor.setDecorations(
     getCharDecoration(
       decorationConfig.firstColor,
@@ -94,7 +65,6 @@ export const colorChars2 = (
     firstColorDecorations
   );
 
-  // Apply second color decorations
   editor.setDecorations(
     getCharDecorationSecondColor(
       decorationConfig.secondColor,
