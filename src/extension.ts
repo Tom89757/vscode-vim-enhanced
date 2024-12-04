@@ -14,7 +14,7 @@ import {
   disposeCharDecoration,
   updateDecorationConfig,
 } from "./decoration";
-import { colorChars, getCurrentLine, getCursorPos } from "./utils";
+import { colorChars2, getCurrentLine, getCursorPos } from "./utils";
 
 let decorationTypeS: vscode.TextEditorDecorationType | undefined;
 let decorationsS: vscode.DecorationOptions[] = [];
@@ -210,7 +210,14 @@ const mainF = (cursorPos: number, currentLine: string) => {
     currentLine,
     cursorPos
   );
-  colorChars(toColor, decorationConfig);
+
+  // 输出 toColor 的内容到 outputChannel
+  outputChannel.appendLine(`toColor: ${JSON.stringify(toColor)}`);
+
+  // 输出 decorationConfig 的内容到 outputChannel
+  outputChannel.appendLine(`decorationConfig: ${JSON.stringify(decorationConfig)}`);
+
+  colorChars2(toColor, decorationConfig);
 };
 
 function handleRemoveSHighlight() {
