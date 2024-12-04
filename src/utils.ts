@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { CharColoring } from "./FCharHighighlighter";
+import { CharColoring } from "./FCharHighlighter";
 import {
   DecorationConfig,
   getCharDecoration,

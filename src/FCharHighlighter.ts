@@ -1,3 +1,5 @@
+import * as vscode from "vscode";
+
 export interface ICharHighlighter {
   getCharHighlightingAfterCursor: (
     lineText: string,
@@ -29,6 +31,12 @@ export interface LineWords {
 }
 
 export class FCharHighlighter implements ICharHighlighter {
+  private outputChannel: vscode.OutputChannel;
+
+  constructor(outputChannel: vscode.OutputChannel) {
+    this.outputChannel = outputChannel;
+  }
+
   public getCharHighlightingAfterCursor(
     lineText: string,
     cursorPos: number
@@ -85,18 +93,65 @@ export class FCharHighlighter implements ICharHighlighter {
       if (!isAlphabetic(word.word)) {
         return;
       }
-      if (word.startIndex > cursorPos) {
+
+      // 检查单词是否包含光标位置
+      if (
+        word.startIndex < cursorPos &&
+        word.startIndex + word.word.length > cursorPos
+      ) {
+        const splitIndex = cursorPos - word.startIndex;
+        const before = word.word.substring(0, splitIndex);
+        const after = word.word.substring(splitIndex + 1);
+
+        if (before) {
+          result.beforeCursor.push({
+            word: before,
+            startIndex: word.startIndex,
+            compare: (charPos, cursorPosition, actualPos) =>
+              charPos < cursorPosition && charPos >= actualPos,
+          });
+
+          this.outputChannel.appendLine(
+            `beforeCursor word: '${before}' at index ${word.startIndex}`
+          );
+        }
+
+        if (after) {
+          result.afterCursor.push({
+            word: after,
+            startIndex: cursorPos + 1,
+            compare: (charPos, cursorPosition, actualPos) =>
+              charPos > cursorPosition && charPos < actualPos,
+          });
+
+          this.outputChannel.appendLine(
+            `afterCursor word: '${after}' at index ${cursorPos}`
+          );
+        }
+      }
+      // 单词完全在光标之后
+      else if (word.startIndex > cursorPos) {
         result.afterCursor.push({
           ...word,
           compare: (charPos, cursorPosition, actualPos) =>
             charPos > cursorPosition && charPos < actualPos,
         });
-      } else if (word.startIndex + word.word.length < cursorPos) {
+
+        this.outputChannel.appendLine(
+          `afterCursor word: '${word.word}' at index ${word.startIndex}`
+        );
+      }
+      // 单词完全在光标之前
+      else if (word.startIndex + word.word.length <= cursorPos) {
         result.beforeCursor.push({
           ...word,
           compare: (charPos, cursorPosition, actualPos) =>
             charPos < cursorPosition && charPos >= actualPos,
         });
+
+        this.outputChannel.appendLine(
+          `beforeCursor word: '${word.word}' at index ${word.startIndex}`
+        );
       }
     };
 
@@ -168,5 +223,3 @@ const isAlphabetic = (str: string) => {
   const wordRegex = /\w/gi;
   return wordRegex.test(str);
 };
-
-export const fCharHighlighter = new FCharHighlighter();

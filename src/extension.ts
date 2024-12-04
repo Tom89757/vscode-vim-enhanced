@@ -8,7 +8,7 @@ import type {
   IFindEndEvent,
 } from "./types/vim";
 
-import { fCharHighlighter } from "./FCharHighighlighter";
+import { FCharHighlighter } from "./FCharHighlighter";
 import {
   decorationConfig,
   disposeCharDecoration,
@@ -25,11 +25,15 @@ let decorationsF: vscode.DecorationOptions[] = [];
 let highlightedLineF: number | null = null;
 
 let outputChannel: vscode.OutputChannel;
+let fCharHighlighter: FCharHighlighter; // 声明 FCharHighlighter 实例
 
 export async function activate(context: vscode.ExtensionContext) {
   // 创建 Output Channel
   outputChannel = vscode.window.createOutputChannel("Vim Enhanced Output");
   outputChannel.appendLine("Vim Enhanced Extension Activated.");
+
+  // 创建 FCharHighlighter 实例并传递 outputChannel
+  fCharHighlighter = new FCharHighlighter(outputChannel);
 
   const vimExtension = vscode.extensions.getExtension<VimAPI>("vscodevim.vim");
 
