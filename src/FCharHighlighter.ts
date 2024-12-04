@@ -96,12 +96,14 @@ export class FCharHighlighter implements ICharHighlighter {
 
       // 检查单词是否包含光标位置
       if (
-        word.startIndex < cursorPos &&
-        word.startIndex + word.word.length > cursorPos
+        word.startIndex <= cursorPos &&
+        word.startIndex + word.word.length >= cursorPos
       ) {
         const splitIndex = cursorPos - word.startIndex;
+        this.outputChannel.appendLine(`splitIndex: ${splitIndex}`);
         const before = word.word.substring(0, splitIndex);
         const after = word.word.substring(splitIndex + 1);
+        this.outputChannel.appendLine(`before: ${before}, after: ${after}`);
 
         if (before) {
           result.beforeCursor.push({
@@ -112,7 +114,7 @@ export class FCharHighlighter implements ICharHighlighter {
           });
 
           this.outputChannel.appendLine(
-            `beforeCursor word: '${before}' at index ${word.startIndex}`
+            `before cursorPos: ${cursorPos}, beforeCursor word: '${before}' at index ${word.startIndex}`
           );
         }
 
@@ -125,7 +127,7 @@ export class FCharHighlighter implements ICharHighlighter {
           });
 
           this.outputChannel.appendLine(
-            `afterCursor word: '${after}' at index ${cursorPos}`
+            `after cursorPos: ${cursorPos}, afterCursor word: '${after}' at index ${cursorPos}`
           );
         }
       }
