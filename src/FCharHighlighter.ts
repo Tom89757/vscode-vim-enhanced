@@ -48,11 +48,24 @@ export class FCharHighlighter implements ICharHighlighter {
     return this.getCharPosToColorAfterCursor(frequencyMap, lineText, cursorPos);
   }
 
+  private formatFrequencyMap(map: Map<string, CharPosition>): string {
+    let formatted = "Character Frequency Map:\n";
+    map.forEach((charPos, char) => {
+      formatted += `Character: '${char}' -> Positions: [${charPos.positions.join(
+        ", "
+      )}]\n`;
+    });
+    return formatted;
+  }
+
   private getCharFrequencyMapAfterCusor(text: string, cursorPos: number) {
     const map: Map<string, CharPosition> = new Map();
     text.split("").forEach((char, index) => {
       //只统计光标之后的字符
       if (index > cursorPos) {
+        this.outputChannel.appendLine(
+          `getCharFrequencyMapAfterCusor for index: ${index}, char: ${char}`
+        );
         if (map.has(char)) {
           map.set(char, { positions: [...map.get(char)!.positions, index] });
         } else {
@@ -60,7 +73,21 @@ export class FCharHighlighter implements ICharHighlighter {
         }
       }
     });
+    this.outputChannel.appendLine(this.formatFrequencyMap(map));
     return map;
+  }
+
+  private formatCharColoringsAsMarkdown(charColorings: CharColoring[]): string {
+    let table = `| Position | minTimesToReach |\n|----------|-----------------|\n`;
+    charColorings.forEach((coloring) => {
+      table += `| ${coloring.position} | ${coloring.minTimesToReach} |\n`;
+    });
+    return table;
+  }
+
+  private displayCharColorings(charColorings: CharColoring[]): void {
+    const table = this.formatCharColoringsAsMarkdown(charColorings);
+    this.outputChannel.appendLine(table);
   }
 
   private getCharPosToColorAfterCursor(
@@ -81,9 +108,14 @@ export class FCharHighlighter implements ICharHighlighter {
 
     const result: CharColoring[] = [];
     for (const word of afterCursor) {
+      this.outputChannel.appendLine(
+        `getCharColoring for ${word.word} in afterCursor`
+      );
       result.push(this.getCharColoring(frequencyMap, word, cursorPos));
     }
-    return result.filter((w) => w.position !== -1);
+    const res = result.filter((w) => w.position !== -1);
+    this.displayCharColorings(res);
+    return res;
   }
 
   private getWordsWithIndexes(text: string, cursorPos: number): LineWords {

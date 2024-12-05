@@ -216,7 +216,7 @@ const mainF = (cursorPos: number, currentLine: string) => {
   );
 
   // 输出 toColor 的内容到 outputChannel
-  outputChannel.appendLine(`toColor: ${JSON.stringify(toColor)}`);
+  // outputChannel.appendLine(`toColor: ${JSON.stringify(toColor)}`);
 
   // 输出 decorationConfig 的内容到 outputChannel
   outputChannel.appendLine(
