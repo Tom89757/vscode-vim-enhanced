@@ -113,6 +113,13 @@ export class FCharHighlighter implements ICharHighlighter {
       );
       result.push(this.getCharColoring(frequencyMap, word, cursorPos));
     }
+
+    this.outputChannel.appendLine("getCharPosToColorAfterCursor: result: ");
+    this.displayCharColorings(result);
+
+    this.outputChannel.appendLine(
+      "getCharPosToColorAfterCursor: res after result.filter: "
+    );
     const res = result.filter((w) => w.position !== -1);
     this.displayCharColorings(res);
     return res;
