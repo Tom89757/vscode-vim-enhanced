@@ -224,38 +224,22 @@ export class FCharHighlighter implements ICharHighlighter {
     let indexOfCharWithMinFreq = -1;
 
     for (const [index, char] of word.word.split("").entries()) {
-      const mapHasChar = frequencyMap.has(char);
       const actualPos = word.startIndex + index;
-
-      if (!mapHasChar) {
-        return {
-          position: actualPos,
-          minTimesToReach: 1,
-        }; //该字符可以用于到达该word（一次jump）
-      }
-
-      const positions = frequencyMap.get(char);
-      const freq = positions!.positions.filter((p) =>
-        word.compare(p, cursorPos, actualPos)
-      ).length; //在光标之后该字符的所有出现
-
-      if (freq <= 1) {
-        return {
-          position: actualPos,
-          minTimesToReach: 1,
-        };
-      }
-
-      //我们不能通过一次jump达到这个word，所以可能可以通过下一个字符来实现
-      if (freq < minFreqForChar) {
-        minFreqForChar = freq;
-        indexOfCharWithMinFreq = actualPos;
+      const charPosition = frequencyMap.get(char);
+      if (charPosition) {
+        const occurrence = charPosition.positions.indexOf(actualPos);
+        if (occurrence !== -1) {
+          if (occurrence + 1 < minFreqForChar) {
+            minFreqForChar = occurrence + 1;
+            indexOfCharWithMinFreq = actualPos;
+          }
+        }
       }
     }
 
     return {
       position: indexOfCharWithMinFreq,
-      minTimesToReach: minFreqForChar,
+      minTimesToReach: minFreqForChar <= 2 ? minFreqForChar : 2,
     };
   }
 }
