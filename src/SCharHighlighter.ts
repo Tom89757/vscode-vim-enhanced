@@ -58,21 +58,25 @@ export class SCharHighlighter implements ICharHighlighter {
     return formatted;
   }
 
-  private getCharFrequencyMapAfterCusor(text: string, cursorPos: number) {
+  private getCharFrequencyMapAfterCusor(
+    text: string,
+    cursorPos: number
+  ): Map<string, CharPosition> {
     const map: Map<string, CharPosition> = new Map();
-    text.split("").forEach((char, index) => {
-      //只统计光标之后的字符
-      if (index > cursorPos) {
-        // this.outputChannel.appendLine(
-        //   `getCharFrequencyMapAfterCusor for index: ${index}, char: ${char}`
-        // );
-        if (map.has(char)) {
-          map.set(char, { positions: [...map.get(char)!.positions, index] });
-        } else {
-          map.set(char, { positions: [index] });
-        }
+
+    // 遍历光标后所有字符，提取双字母组合
+    for (let index = cursorPos; index < text.length - 1; index++) {
+      const firstChar = text[index];
+      const secondChar = text[index + 1];
+      const bigram = firstChar + secondChar;
+
+      if (map.has(bigram)) {
+        map.set(bigram, { positions: [...map.get(bigram)!.positions, index] });
+      } else {
+        map.set(bigram, { positions: [index] });
       }
-    });
+    }
+
     this.outputChannel.appendLine(this.formatFrequencyMap(map));
     return map;
   }

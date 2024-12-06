@@ -9,6 +9,7 @@ import type {
 } from "./types/vim";
 
 import { FCharHighlighter } from "./FCharHighlighter";
+import { SCharHighlighter } from "./SCharHighlighter";
 import {
   decorationConfig,
   disposeCharDecoration,
@@ -24,6 +25,7 @@ let highlightedLineF: number | null = null;
 
 let outputChannel: vscode.OutputChannel;
 let fCharHighlighter: FCharHighlighter; // 声明 FCharHighlighter 实例
+let sCharHighlighter: SCharHighlighter; // 声明 sCharHighlighter 实例
 
 export async function activate(context: vscode.ExtensionContext) {
   // 创建 Output Channel
@@ -32,6 +34,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // 创建 FCharHighlighter 实例并传递 outputChannel
   fCharHighlighter = new FCharHighlighter(outputChannel);
+  sCharHighlighter = new SCharHighlighter(outputChannel);
 
   const vimExtension = vscode.extensions.getExtension<VimAPI>("vscodevim.vim");
 
@@ -152,6 +155,18 @@ function handleEnhanceSKey() {
     vscode.commands.executeCommand("setContext", "enhanceSKeyActive", true);
     highlightedLineS = lineNumber;
   }
+
+  // highlightedLineS = lineNumber;
+
+  //高亮目标字符
+  const line = getCurrentLine();
+  const cursorPos = getCursorPos();
+  if (line?.text.length && cursorPos != undefined) {
+    mainS(cursorPos, line.text);
+  } else {
+    outputChannel.appendLine("disposeCharDecoration() in handleEnhanceFKey()");
+    disposeCharDecoration();
+  }
 }
 
 function handleEnhanceFKey() {
@@ -190,6 +205,20 @@ const mainF = (cursorPos: number, currentLine: string) => {
   colorChars(toColor, decorationConfig);
 };
 
+const mainS = (cursorPos: number, currentLine: string) => {
+  const toColor = sCharHighlighter.getCharHighlightingAfterCursor(
+    currentLine,
+    cursorPos
+  );
+
+  // 输出 decorationConfig 的内容到 outputChannel
+  outputChannel.appendLine(
+    `decorationConfig: ${JSON.stringify(decorationConfig)}`
+  );
+
+  colorChars(toColor, decorationConfig);
+};
+
 function handleRemoveSHighlight() {
   const editor = vscode.window.activeTextEditor;
   if (editor && decorationTypeS) {
@@ -204,6 +233,9 @@ function handleRemoveSHighlight() {
   } else {
     outputChannel.appendLine("No char 'e' highlights to remove.");
   }
+
+  //去除s按键高亮
+  disposeCharDecoration();
 }
 
 function handleRemoveFHighlight() {
