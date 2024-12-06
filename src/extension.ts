@@ -20,8 +20,6 @@ let decorationTypeS: vscode.TextEditorDecorationType | undefined;
 let decorationsS: vscode.DecorationOptions[] = [];
 let highlightedLineS: number | null = null;
 
-let decorationTypeF: vscode.TextEditorDecorationType | undefined;
-let decorationsF: vscode.DecorationOptions[] = [];
 let highlightedLineF: number | null = null;
 
 let outputChannel: vscode.OutputChannel;
@@ -163,40 +161,9 @@ function handleEnhanceFKey() {
     return;
   }
 
-  const document = editor.document;
   const position = editor.selection.active;
   const lineNumber = position.line;
-  const lineText = document.lineAt(lineNumber).text;
-
-  outputChannel.appendLine(`Enhancing 'f' key at line ${lineNumber + 1}.`);
-
-  //定义需要高亮的字符模式，例如字幕'f'
-  const regex = /f/g;
-  let match;
-  decorationsF = [];
-
-  while ((match = regex.exec(lineText)) !== null) {
-    const startPos = new vscode.Position(lineNumber, match.index);
-    const endPos = new vscode.Position(lineNumber, match.index + 1);
-    const decoration = { range: new vscode.Range(startPos, endPos) };
-    decorationsF.push(decoration);
-    outputChannel.appendLine(`Found 'f' at position ${match.index}.`);
-  }
-
-  if (decorationsF.length === 0) {
-    outputChannel.appendLine("No 'f' characters found to highlight.");
-  } else {
-    decorationTypeF = vscode.window.createTextEditorDecorationType({
-      backgroundColor: "rgba(255, 255, 0, 0.3)", // 半透明黄色背景
-      border: "1px solid yellow",
-    });
-    editor.setDecorations(decorationTypeF, decorationsF);
-    outputChannel.appendLine(
-      `Highlighted ${decorationsF.length} 'f' characters.`
-    );
-    vscode.commands.executeCommand("setContext", "enhanceFKeyActive", true);
-    highlightedLineF = lineNumber;
-  }
+  highlightedLineF = lineNumber;
 
   //高亮目标字符
   const line = getCurrentLine();
@@ -214,9 +181,6 @@ const mainF = (cursorPos: number, currentLine: string) => {
     currentLine,
     cursorPos
   );
-
-  // 输出 toColor 的内容到 outputChannel
-  // outputChannel.appendLine(`toColor: ${JSON.stringify(toColor)}`);
 
   // 输出 decorationConfig 的内容到 outputChannel
   outputChannel.appendLine(
@@ -243,30 +207,11 @@ function handleRemoveSHighlight() {
 }
 
 function handleRemoveFHighlight() {
-  const editor = vscode.window.activeTextEditor;
-  if (editor && decorationTypeF) {
-    editor.setDecorations(decorationTypeF, []);
-    decorationTypeF.dispose();
-    decorationTypeF = undefined;
-    decorationsF = [];
-    highlightedLineF = null;
-
-    vscode.commands.executeCommand("setContext", "enhanceFKeyActive", false);
-    outputChannel.appendLine("Removed 'f' character highlights.");
-  } else {
-    outputChannel.appendLine("No char 'f' highlights to remove.");
-  }
-
-  outputChannel.appendLine(
-    "disposeCharDecoration() in handleRemoveFHighlight()"
-  );
+  //去除f按键高亮
   disposeCharDecoration();
 }
 
 function handleSelectionSChange(event: vscode.TextEditorSelectionChangeEvent) {
-  const editor = event.textEditor;
-  // const currentLine = editor.selection.active.line;
-
   if (highlightedLineS === null) {
     // 无高亮，无需处理
     return;
@@ -278,20 +223,11 @@ function handleSelectionSChange(event: vscode.TextEditorSelectionChangeEvent) {
       if (!editor) return;
       const actualCurrentLine = editor.selection.active.line;
 
-      // 调试日志
-      // outputChannel.appendLine(`Event Current Line: ${currentLine + 1}`);
-      // outputChannel.appendLine(`Actual Current Line: ${actualCurrentLine}+1`);
-      // outputChannel.appendLine(
-      //   `Highlighted Line S: ${
-      //     highlightedLineS == null ? highlightedLineS : highlightedLineS + 1
-      //   }`
-      // );
-
       if (highlightedLineS !== null && highlightedLineS !== actualCurrentLine) {
         outputChannel.appendLine(
           `Cursor moved from line ${highlightedLineS + 1} to line ${
             actualCurrentLine + 1
-          }. Removing 'e' highlights.`
+          }. Removing Sneak highlights.`
         );
         vscode.commands.executeCommand(
           "vscodeVimEnhanced.removeEnhanceSKeyHighlight"
@@ -304,9 +240,6 @@ function handleSelectionSChange(event: vscode.TextEditorSelectionChangeEvent) {
 }
 
 function handleSelectionFChange(event: vscode.TextEditorSelectionChangeEvent) {
-  const editor = event.textEditor;
-  // const currentLine = editor.selection.active.line;
-
   if (highlightedLineF === null) {
     // 无高亮，无需处理
     return;
@@ -318,21 +251,12 @@ function handleSelectionFChange(event: vscode.TextEditorSelectionChangeEvent) {
       if (!editor) return;
       const actualCurrentLine = editor.selection.active.line;
 
-      // 调试日志
-      // outputChannel.appendLine(`Event Current Line: ${currentLine + 1}`);
-      // outputChannel.appendLine(`Actual Current Line: ${actualCurrentLine}+1`);
-      // outputChannel.appendLine(
-      //   `Highlighted Line F: ${
-      //     highlightedLineF == null ? highlightedLineF : highlightedLineF + 1
-      //   }`
-      // );
-
       if (highlightedLineF !== null && highlightedLineF !== actualCurrentLine) {
-        outputChannel.appendLine(
-          `Cursor moved from line ${highlightedLineF + 1} to line ${
-            actualCurrentLine + 1
-          }. Removing 'f' highlights.`
-        );
+        // outputChannel.appendLine(
+        //   `Cursor moved from line ${highlightedLineF + 1} to line ${
+        //     actualCurrentLine + 1
+        //   }. Removing Find highlights.`
+        // );
         vscode.commands.executeCommand(
           "vscodeVimEnhanced.removeEnhanceFKeyHighlight"
         );
@@ -387,12 +311,6 @@ function subscribeToVimEvents(api: VimAPI, context: vscode.ExtensionContext) {
 // ... existing code ...
 
 export function deactivate() {
-  if (decorationTypeS) {
-    decorationTypeS.dispose();
-  }
-  if (decorationTypeF) {
-    decorationTypeF.dispose();
-  }
   if (outputChannel) {
     outputChannel.appendLine("Vim Enhanced Extension Deactivated.");
     outputChannel.dispose();
