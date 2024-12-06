@@ -48,11 +48,24 @@ export class SCharHighlighter implements ICharHighlighter {
     return this.getCharPosToColorAfterCursor(frequencyMap, lineText, cursorPos);
   }
 
+  private formatFrequencyMap(map: Map<string, CharPosition>): string {
+    let formatted = "Character Frequency Map:\n";
+    map.forEach((charPos, char) => {
+      formatted += `Character: '${char}' -> Positions: [${charPos.positions.join(
+        ", "
+      )}]\n`;
+    });
+    return formatted;
+  }
+
   private getCharFrequencyMapAfterCusor(text: string, cursorPos: number) {
     const map: Map<string, CharPosition> = new Map();
     text.split("").forEach((char, index) => {
       //只统计光标之后的字符
       if (index > cursorPos) {
+        // this.outputChannel.appendLine(
+        //   `getCharFrequencyMapAfterCusor for index: ${index}, char: ${char}`
+        // );
         if (map.has(char)) {
           map.set(char, { positions: [...map.get(char)!.positions, index] });
         } else {
@@ -60,7 +73,21 @@ export class SCharHighlighter implements ICharHighlighter {
         }
       }
     });
+    this.outputChannel.appendLine(this.formatFrequencyMap(map));
     return map;
+  }
+
+  private formatCharColoringsAsMarkdown(charColorings: CharColoring[]): string {
+    let table = `| Position | minTimesToReach |\n|----------|-----------------|\n`;
+    charColorings.forEach((coloring) => {
+      table += `| ${coloring.position} | ${coloring.minTimesToReach} |\n`;
+    });
+    return table;
+  }
+
+  private displayCharColorings(charColorings: CharColoring[]): void {
+    const table = this.formatCharColoringsAsMarkdown(charColorings);
+    this.outputChannel.appendLine(table);
   }
 
   private getCharPosToColorAfterCursor(
@@ -81,9 +108,18 @@ export class SCharHighlighter implements ICharHighlighter {
 
     const result: CharColoring[] = [];
     for (const word of afterCursor) {
+      this.outputChannel.appendLine(
+        `getCharColoring for ${word.word} in afterCursor`
+      );
       result.push(this.getCharColoring(frequencyMap, word, cursorPos));
     }
-    return result.filter((w) => w.position !== -1);
+
+    this.outputChannel.appendLine(
+      "getCharPosToColorAfterCursor: res after result.filter: "
+    );
+    const res = result.filter((w) => w.position !== -1).slice(1); //去除第一个元素，该元素为光标所在单词的光标后半截的高亮部分，不需要
+    this.displayCharColorings(res);
+    return res;
   }
 
   private getWordsWithIndexes(text: string, cursorPos: number): LineWords {
@@ -96,12 +132,14 @@ export class SCharHighlighter implements ICharHighlighter {
 
       // 检查单词是否包含光标位置
       if (
-        word.startIndex < cursorPos &&
-        word.startIndex + word.word.length > cursorPos
+        word.startIndex <= cursorPos &&
+        word.startIndex + word.word.length >= cursorPos
       ) {
         const splitIndex = cursorPos - word.startIndex;
+        this.outputChannel.appendLine(`splitIndex: ${splitIndex}`);
         const before = word.word.substring(0, splitIndex);
         const after = word.word.substring(splitIndex + 1);
+        this.outputChannel.appendLine(`before: ${before}, after: ${after}`);
 
         if (before) {
           result.beforeCursor.push({
@@ -112,7 +150,7 @@ export class SCharHighlighter implements ICharHighlighter {
           });
 
           this.outputChannel.appendLine(
-            `beforeCursor word: '${before}' at index ${word.startIndex}`
+            `before cursorPos: ${cursorPos}, beforeCursor word: '${before}' at index ${word.startIndex}`
           );
         }
 
@@ -125,7 +163,7 @@ export class SCharHighlighter implements ICharHighlighter {
           });
 
           this.outputChannel.appendLine(
-            `afterCursor word: '${after}' at index ${cursorPos}`
+            `after cursorPos: ${cursorPos}, afterCursor word: '${after}' at index ${cursorPos}`
           );
         }
       }
@@ -183,38 +221,22 @@ export class SCharHighlighter implements ICharHighlighter {
     let indexOfCharWithMinFreq = -1;
 
     for (const [index, char] of word.word.split("").entries()) {
-      const mapHasChar = frequencyMap.has(char);
       const actualPos = word.startIndex + index;
-
-      if (!mapHasChar) {
-        return {
-          position: actualPos,
-          minTimesToReach: 1,
-        }; //该字符可以用于到达该word（一次jump）
-      }
-
-      const positions = frequencyMap.get(char);
-      const freq = positions!.positions.filter((p) =>
-        word.compare(p, cursorPos, actualPos)
-      ).length; //在光标之后该字符的所有出现
-
-      if (freq <= 1) {
-        return {
-          position: actualPos,
-          minTimesToReach: 1,
-        };
-      }
-
-      //我们不能通过一次jump达到这个word，所以可能可以通过下一个字符来实现
-      if (freq < minFreqForChar) {
-        minFreqForChar = freq;
-        indexOfCharWithMinFreq = actualPos;
+      const charPosition = frequencyMap.get(char);
+      if (charPosition) {
+        const occurrence = charPosition.positions.indexOf(actualPos);
+        if (occurrence !== -1) {
+          if (occurrence + 1 < minFreqForChar) {
+            minFreqForChar = occurrence + 1;
+            indexOfCharWithMinFreq = actualPos;
+          }
+        }
       }
     }
 
     return {
       position: indexOfCharWithMinFreq,
-      minTimesToReach: minFreqForChar,
+      minTimesToReach: minFreqForChar <= 2 ? minFreqForChar : 2,
     };
   }
 }

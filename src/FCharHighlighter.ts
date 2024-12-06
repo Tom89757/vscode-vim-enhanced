@@ -63,9 +63,9 @@ export class FCharHighlighter implements ICharHighlighter {
     text.split("").forEach((char, index) => {
       //只统计光标之后的字符
       if (index > cursorPos) {
-        this.outputChannel.appendLine(
-          `getCharFrequencyMapAfterCusor for index: ${index}, char: ${char}`
-        );
+        // this.outputChannel.appendLine(
+        //   `getCharFrequencyMapAfterCusor for index: ${index}, char: ${char}`
+        // );
         if (map.has(char)) {
           map.set(char, { positions: [...map.get(char)!.positions, index] });
         } else {
@@ -114,13 +114,10 @@ export class FCharHighlighter implements ICharHighlighter {
       result.push(this.getCharColoring(frequencyMap, word, cursorPos));
     }
 
-    this.outputChannel.appendLine("getCharPosToColorAfterCursor: result: ");
-    this.displayCharColorings(result);
-
     this.outputChannel.appendLine(
       "getCharPosToColorAfterCursor: res after result.filter: "
     );
-    const res = result.filter((w) => w.position !== -1);
+    const res = result.filter((w) => w.position !== -1).slice(1); //去除第一个元素，该元素为光标所在单词的光标后半截的高亮部分，不需要
     this.displayCharColorings(res);
     return res;
   }
