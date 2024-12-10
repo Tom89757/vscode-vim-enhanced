@@ -15,7 +15,7 @@ import {
   disposeCharDecoration,
   updateDecorationConfig,
 } from "./decoration";
-import { colorChars, getCurrentLine, getCursorPos } from "./utils";
+import { colorChars, colorSChars, getCurrentLine, getCursorPos } from "./utils";
 
 let decorationTypeS: vscode.TextEditorDecorationType | undefined;
 let decorationsS: vscode.DecorationOptions[] = [];
@@ -120,43 +120,12 @@ function handleEnhanceSKey() {
     return;
   }
 
-  const document = editor.document;
   const position = editor.selection.active;
   const lineNumber = position.line;
-  const lineText = document.lineAt(lineNumber).text;
 
-  outputChannel.appendLine(`Enhancing 's' key at line ${lineNumber + 1}.`);
+  outputChannel.appendLine(`Sneak at line ${lineNumber + 1}.`);
 
-  // 定义需要高亮的字符模式，例如字母 'e'
-  const regex = /e/g;
-  let match;
-  decorationsS = [];
-
-  while ((match = regex.exec(lineText)) !== null) {
-    const startPos = new vscode.Position(lineNumber, match.index);
-    const endPos = new vscode.Position(lineNumber, match.index + 1);
-    const decoration = { range: new vscode.Range(startPos, endPos) };
-    decorationsS.push(decoration);
-    outputChannel.appendLine(`Found 'e' at position ${match.index}.`);
-  }
-
-  if (decorationsS.length === 0) {
-    outputChannel.appendLine("No 'e' characters found to highlight.");
-  } else {
-    decorationTypeS = vscode.window.createTextEditorDecorationType({
-      backgroundColor: "rgba(255, 255, 0, 0.3)", // 半透明黄色背景
-      border: "1px solid yellow",
-    });
-
-    editor.setDecorations(decorationTypeS, decorationsS);
-    outputChannel.appendLine(
-      `Highlighted ${decorationsS.length} 'e' characters.`
-    );
-    vscode.commands.executeCommand("setContext", "enhanceSKeyActive", true);
-    highlightedLineS = lineNumber;
-  }
-
-  // highlightedLineS = lineNumber;
+  highlightedLineS = lineNumber;
 
   //高亮目标字符
   const line = getCurrentLine();
@@ -178,6 +147,8 @@ function handleEnhanceFKey() {
 
   const position = editor.selection.active;
   const lineNumber = position.line;
+
+  outputChannel.appendLine(`Find at line ${lineNumber + 1}.`);
   highlightedLineF = lineNumber;
 
   //高亮目标字符
@@ -216,24 +187,10 @@ const mainS = (cursorPos: number, currentLine: string) => {
     `decorationConfig: ${JSON.stringify(decorationConfig)}`
   );
 
-  colorChars(toColor, decorationConfig);
+  colorSChars(toColor, decorationConfig);
 };
 
 function handleRemoveSHighlight() {
-  const editor = vscode.window.activeTextEditor;
-  if (editor && decorationTypeS) {
-    editor.setDecorations(decorationTypeS, []);
-    decorationTypeS.dispose();
-    decorationTypeS = undefined;
-    decorationsS = [];
-    highlightedLineS = null;
-
-    vscode.commands.executeCommand("setContext", "enhanceSKeyActive", false);
-    outputChannel.appendLine("Removed 'e' character highlights.");
-  } else {
-    outputChannel.appendLine("No char 'e' highlights to remove.");
-  }
-
   //去除s按键高亮
   disposeCharDecoration();
 }

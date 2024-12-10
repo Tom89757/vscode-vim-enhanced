@@ -224,9 +224,11 @@ export class SCharHighlighter implements ICharHighlighter {
     let minFreqForChar = Number.MAX_VALUE;
     let indexOfCharWithMinFreq = -1;
 
-    for (const [index, char] of word.word.split("").entries()) {
+    const chars = word.word.split("");
+    for (let index = 0; index < chars.length - 1; index++) {
+      const pair = chars[index] + chars[index + 1];
       const actualPos = word.startIndex + index;
-      const charPosition = frequencyMap.get(char);
+      const charPosition = frequencyMap.get(pair);
       if (charPosition) {
         const occurrence = charPosition.positions.indexOf(actualPos);
         if (occurrence !== -1) {
