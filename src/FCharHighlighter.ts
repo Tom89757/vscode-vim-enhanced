@@ -145,7 +145,9 @@ export class FCharHighlighter implements ICharHighlighter {
       this.outputChannel.appendLine(
         `getCharColoringAfterCursor for ${word.word} in afterCursor`
       );
-      result.push(this.getCharColoringAfterCursor(frequencyMap, word, cursorPos));
+      result.push(
+        this.getCharColoringAfterCursor(frequencyMap, word, cursorPos)
+      );
     }
 
     this.outputChannel.appendLine(
@@ -177,8 +179,9 @@ export class FCharHighlighter implements ICharHighlighter {
       this.outputChannel.appendLine(
         `getCharColoringBeforeCursor for ${word.word} in beforeCursor`
       );
-      result.push(this.getCharColoringBeforeCursor
-        (frequencyMap, word, cursorPos));
+      result.push(
+        this.getCharColoringBeforeCursor(frequencyMap, word, cursorPos)
+      );
     }
 
     this.outputChannel.appendLine(
@@ -307,7 +310,6 @@ export class FCharHighlighter implements ICharHighlighter {
     };
   }
 
-
   private getCharColoringBeforeCursor(
     frequencyMap: Map<string, CharPosition>,
     word: WordWithIndexWithCompareFunc,
@@ -316,12 +318,16 @@ export class FCharHighlighter implements ICharHighlighter {
     let minFreqForChar = Number.MAX_VALUE;
     let indexOfCharWithMinFreq = -1;
 
-    for (const [index, char] of word.word.split("").entries()) {
-      const actualPos = word.startIndex + index;
+    const chars = word.word.split("");
+    for (let i = chars.length - 1; i >= 0; i--) {
+      const char = chars[i];
+      const actualPos = word.startIndex + i;
       const charPosition = frequencyMap.get(char);
       if (charPosition) {
-        const occurrence = charPosition.positions.indexOf(actualPos);
-        if (occurrence !== -1) {
+        const posIndex = charPosition.positions.indexOf(actualPos);
+        if (posIndex !== -1) {
+          //计算occurrence，从后往前索引
+          const occurrence = charPosition.positions.length - posIndex - 1;
           if (occurrence + 1 < minFreqForChar) {
             minFreqForChar = occurrence + 1;
             indexOfCharWithMinFreq = actualPos;
