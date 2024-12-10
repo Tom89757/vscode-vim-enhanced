@@ -218,7 +218,7 @@ const mainF = (cursorPos: number, currentLine: string) => {
 
 
 const mainBackF = (cursorPos: number, currentLine: string) => {
-  const toColor = fCharHighlighter.getCharHighlightingAfterCursor(
+  const toColor = fCharHighlighter.getCharHighlightingBeforeCursor(
     currentLine,
     cursorPos
   );

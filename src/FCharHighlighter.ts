@@ -41,23 +41,26 @@ export class FCharHighlighter implements ICharHighlighter {
     lineText: string,
     cursorPos: number
   ): CharColoring[] {
-    const frequencyMap = this.getCharFrequencyMapAfterCusor(
+    const frequencyMap = this.getCharFrequencyMapAfterCursor(
       lineText,
       cursorPos
     );
     return this.getCharPosToColorAfterCursor(frequencyMap, lineText, cursorPos);
   }
 
-
   public getCharHighlightingBeforeCursor(
     lineText: string,
     cursorPos: number
   ): CharColoring[] {
-    const frequencyMap = this.getCharFrequencyMapBeforeCusor(
+    const frequencyMap = this.getCharFrequencyMapBeforeCursor(
       lineText,
       cursorPos
     );
-    return this.getCharPosToColorBeforeCursor(frequencyMap, lineText, cursorPos);
+    return this.getCharPosToColorBeforeCursor(
+      frequencyMap,
+      lineText,
+      cursorPos
+    );
   }
 
   private formatFrequencyMap(map: Map<string, CharPosition>): string {
@@ -70,7 +73,7 @@ export class FCharHighlighter implements ICharHighlighter {
     return formatted;
   }
 
-  private getCharFrequencyMapAfterCusor(text: string, cursorPos: number) {
+  private getCharFrequencyMapAfterCursor(text: string, cursorPos: number) {
     const map: Map<string, CharPosition> = new Map();
     text.split("").forEach((char, index) => {
       //只统计光标之后的字符
@@ -89,12 +92,11 @@ export class FCharHighlighter implements ICharHighlighter {
     return map;
   }
 
-
-  private getCharFrequencyMapBeforeCusor(text: string, cursorPos: number) {
+  private getCharFrequencyMapBeforeCursor(text: string, cursorPos: number) {
     const map: Map<string, CharPosition> = new Map();
     text.split("").forEach((char, index) => {
-      //只统计光标之后的字符
-      if (index > cursorPos) {
+      //只统计光标之前的字符
+      if (index < cursorPos) {
         // this.outputChannel.appendLine(
         //   `getCharFrequencyMapAfterCusor for index: ${index}, char: ${char}`
         // );
@@ -141,9 +143,9 @@ export class FCharHighlighter implements ICharHighlighter {
     const result: CharColoring[] = [];
     for (const word of afterCursor) {
       this.outputChannel.appendLine(
-        `getCharColoring for ${word.word} in afterCursor`
+        `getCharColoringAfterCursor for ${word.word} in afterCursor`
       );
-      result.push(this.getCharColoring(frequencyMap, word, cursorPos));
+      result.push(this.getCharColoringAfterCursor(frequencyMap, word, cursorPos));
     }
 
     this.outputChannel.appendLine(
@@ -153,7 +155,6 @@ export class FCharHighlighter implements ICharHighlighter {
     this.displayCharColorings(res);
     return res;
   }
-
 
   private getCharPosToColorBeforeCursor(
     frequencyMap: Map<string, CharPosition>,
@@ -161,22 +162,23 @@ export class FCharHighlighter implements ICharHighlighter {
     cursorPos: number
   ): CharColoring[] {
     //对于每个word选中需要被高亮的字符
-    //只获取光标后的单词
+    //只获取光标前的单词
     const { beforeCursor, afterCursor } = this.getWordsWithIndexes(
       text,
       cursorPos
     );
 
-    if (afterCursor.length === 0) {
+    if (beforeCursor.length === 0) {
       return [];
     }
 
     const result: CharColoring[] = [];
-    for (const word of afterCursor) {
+    for (const word of beforeCursor) {
       this.outputChannel.appendLine(
-        `getCharColoring for ${word.word} in afterCursor`
+        `getCharColoringBeforeCursor for ${word.word} in beforeCursor`
       );
-      result.push(this.getCharColoring(frequencyMap, word, cursorPos));
+      result.push(this.getCharColoringBeforeCursor
+        (frequencyMap, word, cursorPos));
     }
 
     this.outputChannel.appendLine(
@@ -186,7 +188,6 @@ export class FCharHighlighter implements ICharHighlighter {
     this.displayCharColorings(res);
     return res;
   }
-
 
   private getWordsWithIndexes(text: string, cursorPos: number): LineWords {
     const result: LineWords = { beforeCursor: [], afterCursor: [] };
@@ -278,7 +279,36 @@ export class FCharHighlighter implements ICharHighlighter {
     return result;
   }
 
-  private getCharColoring(
+  private getCharColoringAfterCursor(
+    frequencyMap: Map<string, CharPosition>,
+    word: WordWithIndexWithCompareFunc,
+    cursorPos: number
+  ): CharColoring {
+    let minFreqForChar = Number.MAX_VALUE;
+    let indexOfCharWithMinFreq = -1;
+
+    for (const [index, char] of word.word.split("").entries()) {
+      const actualPos = word.startIndex + index;
+      const charPosition = frequencyMap.get(char);
+      if (charPosition) {
+        const occurrence = charPosition.positions.indexOf(actualPos);
+        if (occurrence !== -1) {
+          if (occurrence + 1 < minFreqForChar) {
+            minFreqForChar = occurrence + 1;
+            indexOfCharWithMinFreq = actualPos;
+          }
+        }
+      }
+    }
+
+    return {
+      position: indexOfCharWithMinFreq,
+      minTimesToReach: minFreqForChar <= 2 ? minFreqForChar : 2,
+    };
+  }
+
+
+  private getCharColoringBeforeCursor(
     frequencyMap: Map<string, CharPosition>,
     word: WordWithIndexWithCompareFunc,
     cursorPos: number
