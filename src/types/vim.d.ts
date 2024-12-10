@@ -32,4 +32,10 @@ export interface VimAPI {
   onFindForwardEnd: (callback: (event: IFindEndEvent) => void) => {
     dispose(): void;
   };
+  onFindBackwardStart: (callback: (event: IFindStartEvent) => void) => {
+    dispose(): void;
+  };
+  onFindBackwardEnd: (callback: (event: IFindEndEvent) => void) => {
+    dispose(): void;
+  };
 }

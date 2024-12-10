@@ -63,6 +63,10 @@
       {
         "command": "vscodeVimEnhanced.enhanceFKey",
         "title": "Enhance Vim F Key"
+      }, 
+      {
+        "command": "vscodeVimEnhanced.enhanceBackFKey",
+        "title": "Enhance Vim F Key"
       },
       {
         "command": "vscodeVimEnhanced.removeEnhanceSKeyHighlight",
@@ -70,6 +74,10 @@
       },
       {
         "command": "vscodeVimEnhanced.removeEnhanceFKeyHighlight",
+        "title": "Remove Enhance F Key Highlight"
+      },
+      {
+        "command": "vscodeVimEnhanced.removeEnhanceBackFKeyHighlight",
         "title": "Remove Enhance F Key Highlight"
       }
     ]
