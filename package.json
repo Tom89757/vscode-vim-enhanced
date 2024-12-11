@@ -20,12 +20,12 @@
         "vscodeVimEnhanced.charPrimaryColor": {
           "type": "string",
           "default": "red",
-          "description": "The color of the char that can be reached with the f motion within one jump"
+          "description": "The color of the char that can be reached with the f/F/s/S motion within one jump"
         },
         "vscodeVimEnhanced.charSecondaryColor": {
           "type": "string",
           "default": "green",
-          "description": "The color of the char that can be reached with the f motion with more than one jump"
+          "description": "The color of the char that can be reached with the f/F/s/S motion with more than one jump"
         },
         "vscodeVimEnhanced.charFontWeight": {
           "type": "string",
@@ -47,6 +47,16 @@
           "type": "boolean",
           "default": true,
           "description": "If true, a line will be drawn under the highlighted characters"
+        },
+        "vscodeVimEnhanced.visualLineAbove": {
+          "type": "string",
+          "default": "green",
+          "description": "The color of the line number above the visual line"
+        }, 
+        "vscodeVimEnhanced.visualLineBelow": {
+          "type": "string",
+          "default": "red",
+          "description": "The color of the line number below the visual line"
         }
       }
     },
