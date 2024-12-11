@@ -32,6 +32,8 @@ export interface LineWords {
 
 export class FCharHighlighter implements ICharHighlighter {
   private outputChannel: vscode.OutputChannel;
+  private before: string = "";
+  private after: string = "";
 
   constructor(outputChannel: vscode.OutputChannel) {
     this.outputChannel = outputChannel;
@@ -153,7 +155,10 @@ export class FCharHighlighter implements ICharHighlighter {
     this.outputChannel.appendLine(
       "getCharPosToColorAfterCursor: res after result.filter: "
     );
-    const res = result.filter((w) => w.position !== -1).slice(1); //去除第一个元素，该元素为光标所在单词的光标后半截的高亮部分，不需要
+    let res = result.filter((w) => w.position !== -1);
+    if (this.after) {
+      res = res.slice(1); //去除第一个元素，该元素为光标所在单词的光标后半截的高亮部分，不需要
+    }
     this.displayCharColorings(res);
     return res;
   }
@@ -175,7 +180,9 @@ export class FCharHighlighter implements ICharHighlighter {
     }
 
     const result: CharColoring[] = [];
-    for (const word of beforeCursor) {
+    for (let i = beforeCursor.length - 1; i >= 0; i--) {
+      //从后往前遍历
+      const word = beforeCursor[i];
       this.outputChannel.appendLine(
         `getCharColoringBeforeCursor for ${word.word} in beforeCursor`
       );
@@ -187,7 +194,10 @@ export class FCharHighlighter implements ICharHighlighter {
     this.outputChannel.appendLine(
       "getCharPosToColorAfterCursor: res after result.filter: "
     );
-    const res = result.filter((w) => w.position !== -1).slice(1); //去除第一个元素，该元素为光标所在单词的光标后半截的高亮部分，不需要
+    let res = result.filter((w) => w.position !== -1); 
+    if (this.before) {
+      res = res.slice(1); //去除第一个元素，该元素为光标所在单词的光标后半截的高亮部分，不需要
+    }
     this.displayCharColorings(res);
     return res;
   }
@@ -208,7 +218,9 @@ export class FCharHighlighter implements ICharHighlighter {
         const splitIndex = cursorPos - word.startIndex;
         this.outputChannel.appendLine(`splitIndex: ${splitIndex}`);
         const before = word.word.substring(0, splitIndex);
+        this.before = before;
         const after = word.word.substring(splitIndex + 1);
+        this.after = after;
         this.outputChannel.appendLine(`before: ${before}, after: ${after}`);
 
         if (before) {
