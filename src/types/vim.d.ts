@@ -1,4 +1,4 @@
-import { Position } from "vscode";
+import { Event, Position } from "vscode";
 
 // 在您的插件中定义外部 Vim 扩展的 API 接口
 export interface ISneakStartEvent {
@@ -17,6 +17,22 @@ export interface IFindStartEvent {
 export interface IFindEndEvent {
   position: Position;
   searchChar: string;
+}
+
+export enum Mode {
+  Normal,
+  Insert,
+  Visual,
+  VisualBlock,
+  VisualLine,
+  SearchInProgressMode,
+  CommandlineInProgress,
+  Replace,
+  EasyMotionMode,
+  EasyMotionInputMode,
+  SurroundInputMode,
+  OperatorPendingMode,
+  Disabled,
 }
 
 export interface VimAPI {
@@ -45,4 +61,9 @@ export interface VimAPI {
   onFindBackwardEnd: (callback: (event: IFindEndEvent) => void) => {
     dispose(): void;
   };
+  onModeChanged: (callback: (event: Mode) => void) => {
+    dispose(): void;
+  };
+
+  // getCurrentMode(): Promise<Mode | undefined>;
 }

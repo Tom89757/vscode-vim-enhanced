@@ -6,6 +6,7 @@ import type {
   ISneakEndEvent,
   IFindStartEvent,
   IFindEndEvent,
+  Mode,
 } from "./types/vim";
 
 import { FCharHighlighter } from "./FCharHighlighter";
@@ -41,6 +42,8 @@ export async function activate(context: vscode.ExtensionContext) {
     }
     const api = vimExtension.exports;
     if (api && isVimAPI(api)) {
+      // const currentMode = await api.getCurrentMode();
+      // outputChannel.appendLine(`Current Mode: ${currentMode}`);
       // 订阅 SneakForward 事件
       subscribeToVimEvents(api, context);
     } else {
@@ -158,6 +161,33 @@ const configureDecoration = () => {
 };
 
 function isVimAPI(api: any): api is VimAPI {
+  outputChannel.appendLine(
+    `typeof api.onSneakForwardStart: ${typeof api.onSneakForwardStart}`
+  );
+  outputChannel.appendLine(
+    `typeof api.onSneakForwardEnd: ${typeof api.onSneakForwardEnd}`
+  );
+  outputChannel.appendLine(
+    `typeof api.onSneakBackwardStart: ${typeof api.onSneakBackwardStart}`
+  );
+  outputChannel.appendLine(
+    `typeof api.onSneakBackwardEnd: ${typeof api.onSneakBackwardEnd}`
+  );
+  outputChannel.appendLine(
+    `typeof api.onFindForwardStart: ${typeof api.onFindForwardStart}`
+  );
+  outputChannel.appendLine(
+    `typeof api.onFindForwardEnd: ${typeof api.onFindForwardEnd}`
+  );
+  outputChannel.appendLine(
+    `typeof api.onFindBackwardStart: ${typeof api.onFindBackwardStart}`
+  );
+  outputChannel.appendLine(
+    `typeof api.onFindBackwardEnd: ${typeof api.onFindBackwardEnd}`
+  );
+  outputChannel.appendLine(
+    `typeof api.onModeChanged: ${typeof api.onModeChanged}`
+  );
   return (
     api &&
     typeof api.onSneakForwardStart === "function" &&
@@ -168,6 +198,7 @@ function isVimAPI(api: any): api is VimAPI {
     typeof api.onFindForwardEnd === "function" &&
     typeof api.onFindBackwardStart === "function" &&
     typeof api.onFindBackwardEnd === "function"
+    // typeof api.onModeChanged === "function"
   );
 }
 
@@ -467,6 +498,11 @@ function subscribeToVimEvents(api: VimAPI, context: vscode.ExtensionContext) {
     }
   );
 
+  const onModeChangedDisposable = api.onModeChanged((data: Mode) => {
+    outputChannel.appendLine(`Current Mode: ${data}`);
+    // handleRemoveBackFHighlight();
+  });
+
   context.subscriptions.push(
     sneakStartDisposable,
     sneakEndDisposable,
@@ -475,7 +511,8 @@ function subscribeToVimEvents(api: VimAPI, context: vscode.ExtensionContext) {
     findStartDisposable,
     findEndDisposable,
     findBackwardStartDisposable,
-    findBackwardEndDisposable
+    findBackwardEndDisposable,
+    onModeChangedDisposable
   );
 }
 // ... existing code ...
