@@ -58,6 +58,14 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  // 注册增强 S 键命令
+  let enhanceBackSKeyDisposable = vscode.commands.registerCommand(
+    "vscodeVimEnhanced.enhanceBackSKey",
+    () => {
+      handleEnhanceBackSKey();
+    }
+  );
+
   // 注册增强 f 键命令
   let enhanceFKeyDisposable = vscode.commands.registerCommand(
     "vscodeVimEnhanced.enhanceFKey",
@@ -70,7 +78,7 @@ export async function activate(context: vscode.ExtensionContext) {
   let enhanceBackFKeyDisposable = vscode.commands.registerCommand(
     "vscodeVimEnhanced.enhanceBackFKey",
     () => {
-      handleEnhanceFKey();
+      handleEnhanceBackFKey();
     }
   );
 
@@ -79,6 +87,13 @@ export async function activate(context: vscode.ExtensionContext) {
     "vscodeVimEnhanced.removeEnhanceSKeyHighlight",
     () => {
       handleRemoveSHighlight();
+    }
+  );
+
+  let removeBackSHighlightDisposable = vscode.commands.registerCommand(
+    "vscodeVimEnhanced.removeEnhanceBackSKeyHighlight",
+    () => {
+      handleRemoveBackSHighlight();
     }
   );
 
@@ -108,9 +123,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     enhanceSKeyDisposable,
+    enhanceBackSKeyDisposable,
     enhanceFKeyDisposable,
     enhanceBackFKeyDisposable,
     removeSHighlightDisposable,
+    removeBackSHighlightDisposable,
     removeFHighlightDisposable,
     removeBackFHighlightDisposable,
     selectionChangeDisposable
@@ -122,6 +139,8 @@ function isVimAPI(api: any): api is VimAPI {
     api &&
     typeof api.onSneakForwardStart === "function" &&
     typeof api.onSneakForwardEnd === "function" &&
+    typeof api.onSneakBackwardStart === "function" &&
+    typeof api.onSneakBackwardEnd === "function" &&
     typeof api.onFindForwardStart === "function" &&
     typeof api.onFindForwardEnd === "function" &&
     typeof api.onFindBackwardStart === "function" &&
@@ -153,6 +172,59 @@ function handleEnhanceSKey() {
     disposeCharDecoration();
   }
 }
+
+function handleEnhanceBackSKey() {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    outputChannel.appendLine("No active editor found.");
+    return;
+  }
+
+  const position = editor.selection.active;
+  const lineNumber = position.line;
+
+  outputChannel.appendLine(`Sneak at line ${lineNumber + 1}.`);
+
+  highlightedLineS = lineNumber;
+
+  //高亮目标字符
+  const line = getCurrentLine();
+  const cursorPos = getCursorPos();
+  if (line?.text.length && cursorPos != undefined) {
+    mainBackS(cursorPos, line.text);
+  } else {
+    outputChannel.appendLine("disposeCharDecoration() in handleEnhanceFKey()");
+    disposeCharDecoration();
+  }
+}
+
+const mainS = (cursorPos: number, currentLine: string) => {
+  const toColor = sCharHighlighter.getCharHighlightingAfterCursor(
+    currentLine,
+    cursorPos
+  );
+
+  // 输出 decorationConfig 的内容到 outputChannel
+  outputChannel.appendLine(
+    `decorationConfig for SneakForward: ${JSON.stringify(decorationConfig)}`
+  );
+
+  colorSChars(toColor, decorationConfig);
+};
+
+const mainBackS = (cursorPos: number, currentLine: string) => {
+  const toColor = sCharHighlighter.getCharHighlightingAfterCursor(
+    currentLine,
+    cursorPos
+  );
+
+  // 输出 decorationConfig 的内容到 outputChannel
+  outputChannel.appendLine(
+    `decorationConfig for SneakForward: ${JSON.stringify(decorationConfig)}`
+  );
+
+  colorSChars(toColor, decorationConfig);
+};
 
 function handleEnhanceFKey() {
   const editor = vscode.window.activeTextEditor;
@@ -216,7 +288,6 @@ const mainF = (cursorPos: number, currentLine: string) => {
   colorChars(toColor, decorationConfig);
 };
 
-
 const mainBackF = (cursorPos: number, currentLine: string) => {
   const toColor = fCharHighlighter.getCharHighlightingBeforeCursor(
     currentLine,
@@ -231,22 +302,13 @@ const mainBackF = (cursorPos: number, currentLine: string) => {
   colorChars(toColor, decorationConfig);
 };
 
-const mainS = (cursorPos: number, currentLine: string) => {
-  const toColor = sCharHighlighter.getCharHighlightingAfterCursor(
-    currentLine,
-    cursorPos
-  );
-
-  // 输出 decorationConfig 的内容到 outputChannel
-  outputChannel.appendLine(
-    `decorationConfig for SneakForward: ${JSON.stringify(decorationConfig)}`
-  );
-
-  colorSChars(toColor, decorationConfig);
-};
-
 function handleRemoveSHighlight() {
   //去除s按键高亮
+  disposeCharDecoration();
+}
+
+function handleRemoveBackSHighlight() {
+  //去除S按键高亮
   disposeCharDecoration();
 }
 
@@ -325,6 +387,25 @@ function subscribeToVimEvents(api: VimAPI, context: vscode.ExtensionContext) {
     handleRemoveSHighlight();
   });
 
+  // 订阅SneakBackward事件
+  const sneakBackwardStartDisposable = api.onSneakForwardStart(
+    (data: ISneakStartEvent) => {
+      outputChannel.appendLine(
+        `Sneak Backward Started with keys: ${data.keysPressed.join(", ")}`
+      );
+      handleEnhanceBackSKey();
+    }
+  );
+
+  const sneakBackwardEndDisposable = api.onSneakForwardEnd(
+    (data: ISneakEndEvent) => {
+      outputChannel.appendLine(
+        `Sneak Backward Ended at line: ${data.line}, searchString: "${data.searchString}"`
+      );
+      handleRemoveBackSHighlight();
+    }
+  );
+
   // 订阅FindForward事件
   const findStartDisposable = api.onFindForwardStart(
     (data: IFindStartEvent) => {
@@ -364,6 +445,8 @@ function subscribeToVimEvents(api: VimAPI, context: vscode.ExtensionContext) {
   context.subscriptions.push(
     sneakStartDisposable,
     sneakEndDisposable,
+    sneakBackwardStartDisposable,
+    sneakBackwardEndDisposable,
     findStartDisposable,
     findEndDisposable,
     findBackwardStartDisposable,
