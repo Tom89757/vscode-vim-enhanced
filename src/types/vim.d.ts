@@ -19,7 +19,7 @@ export interface IFindEndEvent {
   searchChar: string;
 }
 
-export enum Mode {
+export declare enum Mode {
   Normal,
   Insert,
   Visual,

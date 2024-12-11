@@ -11,6 +11,7 @@ import type {
 
 import { FCharHighlighter } from "./FCharHighlighter";
 import { SCharHighlighter } from "./SCharHighlighter";
+import { VCharHighlighter } from "./VCharHighlighter";
 import {
   decorationConfig,
   disposeCharDecoration,
@@ -24,6 +25,7 @@ let highlightedLineF: number | null = null;
 let outputChannel: vscode.OutputChannel;
 let fCharHighlighter: FCharHighlighter; // 声明 FCharHighlighter 实例
 let sCharHighlighter: SCharHighlighter; // 声明 sCharHighlighter 实例
+let vCharHighlighter: VCharHighlighter; // 声明 vCharHighlighter 实例
 
 export async function activate(context: vscode.ExtensionContext) {
   // 创建 Output Channel
@@ -33,6 +35,7 @@ export async function activate(context: vscode.ExtensionContext) {
   // 创建 FCharHighlighter 实例并传递 outputChannel
   fCharHighlighter = new FCharHighlighter(outputChannel);
   sCharHighlighter = new SCharHighlighter(outputChannel);
+  vCharHighlighter = new VCharHighlighter(outputChannel);
 
   const vimExtension = vscode.extensions.getExtension<VimAPI>("vscodevim.vim");
 
@@ -42,9 +45,6 @@ export async function activate(context: vscode.ExtensionContext) {
     }
     const api = vimExtension.exports;
     if (api && isVimAPI(api)) {
-      // const currentMode = await api.getCurrentMode();
-      // outputChannel.appendLine(`Current Mode: ${currentMode}`);
-      // 订阅 SneakForward 事件
       subscribeToVimEvents(api, context);
     } else {
       outputChannel.appendLine("无法访问 Vim 扩展的 API。");
@@ -500,7 +500,25 @@ function subscribeToVimEvents(api: VimAPI, context: vscode.ExtensionContext) {
 
   const onModeChangedDisposable = api.onModeChanged((data: Mode) => {
     outputChannel.appendLine(`Current Mode: ${data}`);
-    // handleRemoveBackFHighlight();
+    const editor = vscode.window.activeTextEditor;
+    if (data === 4) {
+      outputChannel.appendLine("show relative line numbers.");
+      if (editor) {
+        vCharHighlighter.showRelativeLineNumbers(
+          editor,
+          editor.selection.active.line
+        );
+      } else {
+        outputChannel.appendLine("No active editor found.");
+      }
+    } else {
+      outputChannel.appendLine("remove relative line numbers.");
+      if (editor) {
+        vCharHighlighter.clearRelativeLineNumbers(editor);
+      } else {
+        outputChannel.appendLine("No active editor found.");
+      }
+    }
   });
 
   context.subscriptions.push(

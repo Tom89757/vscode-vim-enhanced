@@ -46,6 +46,26 @@ export const getCharDecorationSecondColor = (
   return charDecorationSecondColor;
 };
 
+
+// Define decoration types for relative line numbers above and below
+export const relativeLineNumberAboveDecoration = vscode.window.createTextEditorDecorationType({
+  after: {
+    contentText: "",
+    margin: "0 0 0 5px",
+    // Additional styling if needed
+  },
+  isWholeLine: true,
+});
+
+export const relativeLineNumberBelowDecoration = vscode.window.createTextEditorDecorationType({
+  after: {
+    contentText: "",
+    margin: "0 0 0 5px",
+    // Additional styling if needed
+  },
+  isWholeLine: true,
+});
+
 export class DecorationConfig {
   public firstColor: string;
   public secondColor: string;
