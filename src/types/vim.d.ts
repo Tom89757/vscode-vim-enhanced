@@ -65,5 +65,4 @@ export interface VimAPI {
     dispose(): void;
   };
 
-  // getCurrentMode(): Promise<Mode | undefined>;
 }
