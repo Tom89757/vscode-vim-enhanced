@@ -121,6 +121,23 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions
   );
 
+  // 监听配置变化
+  let configurationChangeDisposable = vscode.workspace.onDidChangeConfiguration(
+    (e) => {
+      const configChanged =
+        e.affectsConfiguration("vscodeVimEnhanced.charPrimaryColor") ||
+        e.affectsConfiguration("vscodeVimEnhanced.charSecondaryColor") ||
+        e.affectsConfiguration("vscodeVimEnhanced.charFontWeight") ||
+        e.affectsConfiguration("vscodeVimEnhanced.enableUnderline");
+
+      if (configChanged) {
+        configureDecoration();
+      }
+    }
+  );
+
+  configureDecoration();
+
   context.subscriptions.push(
     enhanceSKeyDisposable,
     enhanceBackSKeyDisposable,
@@ -130,9 +147,15 @@ export async function activate(context: vscode.ExtensionContext) {
     removeBackSHighlightDisposable,
     removeFHighlightDisposable,
     removeBackFHighlightDisposable,
-    selectionChangeDisposable
+    selectionChangeDisposable,
+    configurationChangeDisposable
   );
 }
+
+const configureDecoration = () => {
+  updateDecorationConfig();
+  disposeCharDecoration();
+};
 
 function isVimAPI(api: any): api is VimAPI {
   return (
@@ -269,7 +292,9 @@ function handleEnhanceBackFKey() {
   if (line?.text.length && cursorPos != undefined) {
     mainBackF(cursorPos, line.text);
   } else {
-    outputChannel.appendLine("disposeCharDecoration() in handleEnhanceBackFKey()");
+    outputChannel.appendLine(
+      "disposeCharDecoration() in handleEnhanceBackFKey()"
+    );
     disposeCharDecoration();
   }
 }
