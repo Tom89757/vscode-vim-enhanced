@@ -158,7 +158,7 @@ function handleEnhanceSKey() {
   const position = editor.selection.active;
   const lineNumber = position.line;
 
-  outputChannel.appendLine(`Sneak at line ${lineNumber + 1}.`);
+  outputChannel.appendLine(`Sneak Forward at line ${lineNumber + 1}.`);
 
   highlightedLineS = lineNumber;
 
@@ -183,7 +183,7 @@ function handleEnhanceBackSKey() {
   const position = editor.selection.active;
   const lineNumber = position.line;
 
-  outputChannel.appendLine(`Sneak at line ${lineNumber + 1}.`);
+  outputChannel.appendLine(`Sneak Backward at line ${lineNumber + 1}.`);
 
   highlightedLineS = lineNumber;
 
@@ -213,14 +213,14 @@ const mainS = (cursorPos: number, currentLine: string) => {
 };
 
 const mainBackS = (cursorPos: number, currentLine: string) => {
-  const toColor = sCharHighlighter.getCharHighlightingAfterCursor(
+  const toColor = sCharHighlighter.getCharHighlightingBeforeCursor(
     currentLine,
     cursorPos
   );
 
   // 输出 decorationConfig 的内容到 outputChannel
   outputChannel.appendLine(
-    `decorationConfig for SneakForward: ${JSON.stringify(decorationConfig)}`
+    `decorationConfig for SneakBackward: ${JSON.stringify(decorationConfig)}`
   );
 
   colorSChars(toColor, decorationConfig);
@@ -236,7 +236,7 @@ function handleEnhanceFKey() {
   const position = editor.selection.active;
   const lineNumber = position.line;
 
-  outputChannel.appendLine(`Find at line ${lineNumber + 1}.`);
+  outputChannel.appendLine(`Find Forward at line ${lineNumber + 1}.`);
   highlightedLineF = lineNumber;
 
   //高亮目标字符
@@ -260,7 +260,7 @@ function handleEnhanceBackFKey() {
   const position = editor.selection.active;
   const lineNumber = position.line;
 
-  outputChannel.appendLine(`Find at line ${lineNumber + 1}.`);
+  outputChannel.appendLine(`Find Backward at line ${lineNumber + 1}.`);
   highlightedLineF = lineNumber;
 
   //高亮目标字符
@@ -269,7 +269,7 @@ function handleEnhanceBackFKey() {
   if (line?.text.length && cursorPos != undefined) {
     mainBackF(cursorPos, line.text);
   } else {
-    outputChannel.appendLine("disposeCharDecoration() in handleEnhanceFKey()");
+    outputChannel.appendLine("disposeCharDecoration() in handleEnhanceBackFKey()");
     disposeCharDecoration();
   }
 }
@@ -388,7 +388,7 @@ function subscribeToVimEvents(api: VimAPI, context: vscode.ExtensionContext) {
   });
 
   // 订阅SneakBackward事件
-  const sneakBackwardStartDisposable = api.onSneakForwardStart(
+  const sneakBackwardStartDisposable = api.onSneakBackwardStart(
     (data: ISneakStartEvent) => {
       outputChannel.appendLine(
         `Sneak Backward Started with keys: ${data.keysPressed.join(", ")}`
@@ -397,7 +397,7 @@ function subscribeToVimEvents(api: VimAPI, context: vscode.ExtensionContext) {
     }
   );
 
-  const sneakBackwardEndDisposable = api.onSneakForwardEnd(
+  const sneakBackwardEndDisposable = api.onSneakBackwardEnd(
     (data: ISneakEndEvent) => {
       outputChannel.appendLine(
         `Sneak Backward Ended at line: ${data.line}, searchString: "${data.searchString}"`

@@ -26,6 +26,13 @@ export interface VimAPI {
   onSneakForwardEnd: (callback: (event: ISneakEndEvent) => void) => {
     dispose(): void;
   };
+
+  onSneakBackwardStart: (callback: (event: ISneakStartEvent) => void) => {
+    dispose(): void;
+  };
+  onSneakBackwardEnd: (callback: (event: ISneakEndEvent) => void) => {
+    dispose(): void;
+  };
   onFindForwardStart: (callback: (event: IFindStartEvent) => void) => {
     dispose(): void;
   };

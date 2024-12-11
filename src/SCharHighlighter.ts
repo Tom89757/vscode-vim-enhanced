@@ -43,11 +43,26 @@ export class SCharHighlighter implements ICharHighlighter {
     lineText: string,
     cursorPos: number
   ): CharColoring[] {
-    const frequencyMap = this.getCharFrequencyMapAfterCusor(
+    const frequencyMap = this.getCharFrequencyMapAfterCursor(
       lineText,
       cursorPos
     );
     return this.getCharPosToColorAfterCursor(frequencyMap, lineText, cursorPos);
+  }
+
+  public getCharHighlightingBeforeCursor(
+    lineText: string,
+    cursorPos: number
+  ): CharColoring[] {
+    const frequencyMap = this.getCharFrequencyMapBeforeCursor(
+      lineText,
+      cursorPos
+    );
+    return this.getCharPosToColorBeforeCursor(
+      frequencyMap,
+      lineText,
+      cursorPos
+    );
   }
 
   private formatFrequencyMap(map: Map<string, CharPosition>): string {
@@ -60,7 +75,7 @@ export class SCharHighlighter implements ICharHighlighter {
     return formatted;
   }
 
-  private getCharFrequencyMapAfterCusor(
+  private getCharFrequencyMapAfterCursor(
     text: string,
     cursorPos: number
   ): Map<string, CharPosition> {
@@ -76,6 +91,31 @@ export class SCharHighlighter implements ICharHighlighter {
         map.set(bigram, { positions: [...map.get(bigram)!.positions, index] });
       } else {
         map.set(bigram, { positions: [index] });
+      }
+    }
+
+    this.outputChannel.appendLine(this.formatFrequencyMap(map));
+    return map;
+  }
+
+  private getCharFrequencyMapBeforeCursor(
+    text: string,
+    cursorPos: number
+  ): Map<string, CharPosition> {
+    const map: Map<string, CharPosition> = new Map();
+
+    // 遍历光标前所有字符，提取双字母组合
+    for (let index = 1; index < cursorPos; index++) {
+      const firstChar = text[index - 1];
+      const secondChar = text[index];
+      const bigram = firstChar + secondChar;
+
+      if (map.has(bigram)) {
+        map.set(bigram, {
+          positions: [...map.get(bigram)!.positions, index - 1],
+        });
+      } else {
+        map.set(bigram, { positions: [index - 1] });
       }
     }
 
@@ -117,7 +157,9 @@ export class SCharHighlighter implements ICharHighlighter {
       this.outputChannel.appendLine(
         `getCharColoring for ${word.word} in afterCursor`
       );
-      result.push(this.getCharColoring(frequencyMap, word, cursorPos));
+      result.push(
+        this.getCharColoringAfterCursor(frequencyMap, word, cursorPos)
+      );
     }
 
     this.outputChannel.appendLine(
@@ -125,6 +167,45 @@ export class SCharHighlighter implements ICharHighlighter {
     );
     let res = result.filter((w) => w.position !== -1);
     if (this.after.length > 1) {
+      res = res.slice(1); //去除第一个元素，该元素为光标所在单词的光标后半截的高亮部分，不需要
+    }
+    this.displayCharColorings(res);
+    return res;
+  }
+
+  private getCharPosToColorBeforeCursor(
+    frequencyMap: Map<string, CharPosition>,
+    text: string,
+    cursorPos: number
+  ): CharColoring[] {
+    //对于每个word选中需要被高亮的字符
+    //只获取光标后的单词
+    const { beforeCursor, afterCursor } = this.getWordsWithIndexes(
+      text,
+      cursorPos
+    );
+
+    if (beforeCursor.length === 0) {
+      return [];
+    }
+
+    const result: CharColoring[] = [];
+    for (let i = beforeCursor.length - 1; i >= 0; i--) {
+      //从后往前遍历
+      const word = beforeCursor[i];
+      this.outputChannel.appendLine(
+        `getCharColoringBeforeCursor for ${word.word} in beforeCursor`
+      );
+      result.push(
+        this.getCharColoringBeforeCursor(frequencyMap, word, cursorPos)
+      );
+    }
+
+    this.outputChannel.appendLine(
+      "getCharPosToColorAfterCursor: res after result.filter: "
+    );
+    let res = result.filter((w) => w.position !== -1);
+    if (this.before.length > 1 && text[cursorPos] !== " ") {
       res = res.slice(1); //去除第一个元素，该元素为光标所在单词的光标后半截的高亮部分，不需要
     }
     this.displayCharColorings(res);
@@ -223,7 +304,7 @@ export class SCharHighlighter implements ICharHighlighter {
     return result;
   }
 
-  private getCharColoring(
+  private getCharColoringAfterCursor(
     frequencyMap: Map<string, CharPosition>,
     word: WordWithIndexWithCompareFunc,
     cursorPos: number
@@ -239,6 +320,38 @@ export class SCharHighlighter implements ICharHighlighter {
       if (charPosition) {
         const occurrence = charPosition.positions.indexOf(actualPos);
         if (occurrence !== -1) {
+          if (occurrence + 1 < minFreqForChar) {
+            minFreqForChar = occurrence + 1;
+            indexOfCharWithMinFreq = actualPos;
+          }
+        }
+      }
+    }
+
+    return {
+      position: indexOfCharWithMinFreq,
+      minTimesToReach: minFreqForChar <= 2 ? minFreqForChar : 2,
+    };
+  }
+
+  private getCharColoringBeforeCursor(
+    frequencyMap: Map<string, CharPosition>,
+    word: WordWithIndexWithCompareFunc,
+    cursorPos: number
+  ): CharColoring {
+    let minFreqForChar = Number.MAX_VALUE;
+    let indexOfCharWithMinFreq = -1;
+
+    const chars = word.word.split("");
+    // for (let index = 0; index < chars.length - 1; index++) {
+    for (let index = chars.length - 2; index >= 0; index--) {
+      const pair = chars[index] + chars[index + 1];
+      const actualPos = word.startIndex + index;
+      const charPosition = frequencyMap.get(pair);
+      if (charPosition) {
+        const posIndex = charPosition.positions.indexOf(actualPos);
+        if (posIndex !== -1) {
+          const occurrence = charPosition.positions.length - posIndex - 1;
           if (occurrence + 1 < minFreqForChar) {
             minFreqForChar = occurrence + 1;
             indexOfCharWithMinFreq = actualPos;
