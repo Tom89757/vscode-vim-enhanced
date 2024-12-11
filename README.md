@@ -1,71 +1,55 @@
-# vscode-vim-enhanced README
+# vscode-vim-enhanced
 
-This is the README for your extension "vscode-vim-enhanced". After writing up a brief description, we recommend including the following sections.
+**vscode-vim-enhanced** 是一个增强版的 Vim 插件，旨在为 Visual Studio Code 提供更强大的导航和高亮功能，提升编辑效率。
 
-## Features
+## 功能
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **增强的 F/F 键导航**：通过高亮可达字符，快速跳转到指定位置。
+- **增强的 S/S 键导航**：同样提供高亮功能，支持更精准的跳转控制。
+- **自定义高亮颜色和样式**：根据个人喜好调整高亮颜色、字体粗细和下划线样式。
+- **集成输出通道**：在操作过程中输出调试信息，方便开发和调试。
 
-For example if there is an image subfolder under your extension project workspace:
+## 安装
 
-\!\[feature X\]\(images/feature-x.png\)
+1. 打开 Visual Studio Code。
+2. 前往扩展市场，搜索 `vscode-vim-enhanced`。
+3. 点击 **安装** 按钮进行安装。
+4. 重启 VS Code 以激活插件。
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## 使用方法
 
-## Requirements
+- **F/F 键导航**：按下 `f` 键后，插件会高亮当前行中所有可达的字符，按下目标字符即可跳转。
+- **S/S 键导航**：按下 `s` 键后，同样会高亮可达字符，选择目标字符进行跳转。
+- **配置快捷键**：可通过 `package.json` 中的命令进行自定义快捷键设置。
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+## 配置
 
-## Extension Settings
+插件提供多种配置选项，允许用户自定义高亮颜色、字体粗细和下划线样式。
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+```json
+{
+  "vscodeVimEnhanced.charPrimaryColor": "red",
+  "vscodeVimEnhanced.charSecondaryColor": "green",
+  "vscodeVimEnhanced.charFontWeight": "400",
+  "vscodeVimEnhanced.enableUnderline": true,
+  "vscodeVimEnhanced.enableAutoHighlight": true
+}
+```
 
-For example:
+您可以在 settings.json 文件中调整这些设置，以适应您的编辑需求。例如：
 
-This extension contributes the following settings:
+## 命令
+插件集成了多个命令，您可以通过命令面板（Ctrl+Shift+P 或 Cmd+Shift+P）访问：
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+- vscodeVimEnhanced.enhanceFKey：启用 F 键增强功能。
+- vscodeVimEnhanced.enhanceBackFKey：启用反向 F 键增强功能。
+- vscodeVimEnhanced.removeEnhanceFKeyHighlight：移除 F 键高亮。
+- vscodeVimEnhanced.enhanceSKey：启用 S 键增强功能。
+- vscodeVimEnhanced.enhanceBackSKey：启用反向 S 键增强功能。
+- vscodeVimEnhanced.removeEnhanceSKeyHighlight：移除 S 键高亮。
 
-## Known Issues
+## 贡献
+欢迎提交问题或贡献代码。请参考 LICENSE 了解更多信息。
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+## 许可证
+该项目基于 Apache License 2.0 许可证开源。
