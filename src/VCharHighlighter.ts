@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import {
+  decorationConfig,
   relativeLineNumberAboveDecoration,
   relativeLineNumberBelowDecoration,
 } from "./decoration";
@@ -11,7 +12,11 @@ export class VCharHighlighter {
     this.outputChannel = outputChannel;
   }
 
-  showRelativeLineNumbers(editor: vscode.TextEditor, cursorLine: number) {
+  showRelativeLineNumbers(
+    editor: vscode.TextEditor,
+    cursorLine: number,
+    DecorationConfig: any
+  ) {
     const decorationsAbove: vscode.DecorationOptions[] = [];
     const decorationsBelow: vscode.DecorationOptions[] = [];
     const totalLines = editor.document.lineCount;
@@ -29,7 +34,7 @@ export class VCharHighlighter {
         renderOptions: {
           before: {
             contentText: `${relativeLineNumber}`,
-            color: "green",
+            color: decorationConfig.visualLineAbove,
             fontWeight: "bold",
           },
         },
@@ -49,7 +54,7 @@ export class VCharHighlighter {
         renderOptions: {
           before: {
             contentText: `${relativeLineNumber}`,
-            color: "red",
+            color: decorationConfig.visualLineBelow,
             fontWeight: "bold",
           },
         },

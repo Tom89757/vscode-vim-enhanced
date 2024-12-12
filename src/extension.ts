@@ -131,7 +131,9 @@ export async function activate(context: vscode.ExtensionContext) {
         e.affectsConfiguration("vscodeVimEnhanced.charPrimaryColor") ||
         e.affectsConfiguration("vscodeVimEnhanced.charSecondaryColor") ||
         e.affectsConfiguration("vscodeVimEnhanced.charFontWeight") ||
-        e.affectsConfiguration("vscodeVimEnhanced.enableUnderline");
+        e.affectsConfiguration("vscodeVimEnhanced.enableUnderline") ||
+        e.affectsConfiguration("vscodeVimEnhanced.visualLineAbove") ||
+        e.affectsConfiguration("vscodeVimEnhanced.visualLineBelow");
 
       if (configChanged) {
         configureDecoration();
@@ -161,33 +163,6 @@ const configureDecoration = () => {
 };
 
 function isVimAPI(api: any): api is VimAPI {
-  outputChannel.appendLine(
-    `typeof api.onSneakForwardStart: ${typeof api.onSneakForwardStart}`
-  );
-  outputChannel.appendLine(
-    `typeof api.onSneakForwardEnd: ${typeof api.onSneakForwardEnd}`
-  );
-  outputChannel.appendLine(
-    `typeof api.onSneakBackwardStart: ${typeof api.onSneakBackwardStart}`
-  );
-  outputChannel.appendLine(
-    `typeof api.onSneakBackwardEnd: ${typeof api.onSneakBackwardEnd}`
-  );
-  outputChannel.appendLine(
-    `typeof api.onFindForwardStart: ${typeof api.onFindForwardStart}`
-  );
-  outputChannel.appendLine(
-    `typeof api.onFindForwardEnd: ${typeof api.onFindForwardEnd}`
-  );
-  outputChannel.appendLine(
-    `typeof api.onFindBackwardStart: ${typeof api.onFindBackwardStart}`
-  );
-  outputChannel.appendLine(
-    `typeof api.onFindBackwardEnd: ${typeof api.onFindBackwardEnd}`
-  );
-  outputChannel.appendLine(
-    `typeof api.onModeChanged: ${typeof api.onModeChanged}`
-  );
   return (
     api &&
     typeof api.onSneakForwardStart === "function" &&
@@ -197,8 +172,8 @@ function isVimAPI(api: any): api is VimAPI {
     typeof api.onFindForwardStart === "function" &&
     typeof api.onFindForwardEnd === "function" &&
     typeof api.onFindBackwardStart === "function" &&
-    typeof api.onFindBackwardEnd === "function"
-    // typeof api.onModeChanged === "function"
+    typeof api.onFindBackwardEnd === "function" &&
+    typeof api.onModeChanged === "function"
   );
 }
 
@@ -506,7 +481,8 @@ function subscribeToVimEvents(api: VimAPI, context: vscode.ExtensionContext) {
       if (editor) {
         vCharHighlighter.showRelativeLineNumbers(
           editor,
-          editor.selection.active.line
+          editor.selection.active.line,
+          decorationConfig
         );
       } else {
         outputChannel.appendLine("No active editor found.");
