@@ -476,7 +476,7 @@ function subscribeToVimEvents(api: VimAPI, context: vscode.ExtensionContext) {
   const onModeChangedDisposable = api.onModeChanged((data: Mode) => {
     outputChannel.appendLine(`Current Mode: ${data}`);
     const editor = vscode.window.activeTextEditor;
-    if (data === 4) {
+    if (data === 4 || data === 3) {
       outputChannel.appendLine("show relative line numbers.");
       if (editor) {
         vCharHighlighter.showRelativeLineNumbers(
