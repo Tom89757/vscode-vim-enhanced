@@ -477,8 +477,8 @@ function subscribeToVimEvents(api: VimAPI, context: vscode.ExtensionContext) {
     outputChannel.appendLine(`Current Mode: ${data}`);
     const editor = vscode.window.activeTextEditor;
     if (data === 4 || data === 3) {
-      outputChannel.appendLine("show relative line numbers.");
       if (editor) {
+        outputChannel.appendLine("show relative line numbers.");
         vCharHighlighter.showRelativeLineNumbers(
           editor,
           editor.selection.active.line,
@@ -487,10 +487,20 @@ function subscribeToVimEvents(api: VimAPI, context: vscode.ExtensionContext) {
       } else {
         outputChannel.appendLine("No active editor found.");
       }
+    } else if (data === 2) {
+      // const line = getCurrentLine();
+      const cursorPos = getCursorPos();
+      if (editor && cursorPos) {
+        outputChannel.appendLine("show relative word indices.");
+        vCharHighlighter.showWordIndices(editor, cursorPos);
+      }
     } else {
-      outputChannel.appendLine("remove relative line numbers.");
+      outputChannel.appendLine(
+        "remove relative line numbers and word indices."
+      );
       if (editor) {
         vCharHighlighter.clearRelativeLineNumbers(editor);
+        vCharHighlighter.clearWordIndices(editor);
       } else {
         outputChannel.appendLine("No active editor found.");
       }
