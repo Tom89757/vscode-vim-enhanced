@@ -53,7 +53,7 @@
           "type": "string",
           "default": "green",
           "description": "The color of the line number above the visual line"
-        }, 
+        },
         "vscodeVimEnhanced.visualLineBelow": {
           "type": "string",
           "default": "red",
@@ -63,36 +63,8 @@
     },
     "commands": [
       {
-        "command": "vscodeVimEnhanced.enhanceSKey",
-        "title": "Enhance Vim S Key"
-      },
-      {
-        "command": "vscodeVimEnhanced.enhanceBackSKey",
-        "title": "Enhance Vim Back S Key"
-      },
-      {
-        "command": "vscodeVimEnhanced.enhanceFKey",
-        "title": "Enhance Vim F Key"
-      },
-      {
-        "command": "vscodeVimEnhanced.enhanceBackFKey",
-        "title": "Enhance Vim Back F Key"
-      },
-      {
-        "command": "vscodeVimEnhanced.removeEnhanceSKeyHighlight",
-        "title": "Remove Enhance S Key Highlight"
-      },
-      {
-        "command": "vscodeVimEnhanced.removeEnhanceBackSKeyHighlight",
-        "title": "Remove Enhance Back S Key Highlight"
-      },
-      {
-        "command": "vscodeVimEnhanced.removeEnhanceFKeyHighlight",
-        "title": "Remove Enhance F Key Highlight"
-      },
-      {
-        "command": "vscodeVimEnhanced.removeEnhanceBackFKeyHighlight",
-        "title": "Remove Enhance Back F Key Highlight"
+        "command": "vscodeVimEnhanced.toggleShowRelativeLineNumber",
+        "title": "toggle show relative line number"
       }
     ]
   },
