@@ -82,7 +82,7 @@ export class SCharHighlighter implements ICharHighlighter {
     const map: Map<string, CharPosition> = new Map();
 
     // 遍历光标后所有字符，提取双字母组合
-    for (let index = cursorPos; index < text.length - 1; index++) {
+    for (let index = cursorPos + 1; index < text.length - 1; index++) {
       const firstChar = text[index];
       const secondChar = text[index + 1];
       const bigram = firstChar + secondChar;

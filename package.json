@@ -2,7 +2,7 @@
   "name": "vscode-vim-enhanced",
   "displayName": "vscode-vim-enhanced",
   "description": "",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "icon": "images/icon.png",
   "engines": {
     "vscode": "^1.95.0"
@@ -60,13 +60,7 @@
           "description": "The color of the line number below the visual line"
         }
       }
-    },
-    "commands": [
-      {
-        "command": "vscodeVimEnhanced.toggleShowRelativeLineNumber",
-        "title": "toggle show relative line number"
-      }
-    ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

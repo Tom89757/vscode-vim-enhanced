@@ -60,7 +60,6 @@ export async function activate(context: vscode.ExtensionContext) {
     (event) => {
       handleSelectionSChange(event);
       handleSelectionFChange(event);
-      handleChangeLine(event);
     },
     null,
     context.subscriptions
@@ -83,20 +82,11 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  //注册切换相对行号的命令
-  let toggleShowRelativeLineNumberDisposable = vscode.commands.registerCommand(
-    "vscodeVimEnhanced.toggleShowRelativeLineNumber",
-    () => {
-      toggleShowRelativeLineNumber();
-    }
-  );
-
   configureDecoration();
 
   context.subscriptions.push(
     selectionChangeDisposable,
-    configurationChangeDisposable,
-    toggleShowRelativeLineNumberDisposable
+    configurationChangeDisposable
   );
 }
 
@@ -286,28 +276,6 @@ function handleRemoveFHighlight() {
   disposeCharDecoration();
 }
 
-function handleChangeLine(event: vscode.TextEditorSelectionChangeEvent) {
-  if (currLine === null) {
-    //无高亮，无需处理
-    return;
-  }
-  if (currLine !== null) {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) return;
-    const actualCurrentLine = editor.selection.active.line;
-
-    if (
-      currLine !== null &&
-      currLine !== actualCurrentLine &&
-      isRelativeLineNumbersShown
-    ) {
-      vscode.commands.executeCommand(
-        "vscodeVimEnhanced.toggleShowRelativeLineNumber"
-      );
-    }
-  }
-}
-
 function handleSelectionSChange(event: vscode.TextEditorSelectionChangeEvent) {
   if (highlightedLineS === null) {
     // 无高亮，无需处理
@@ -342,9 +310,7 @@ function handleSelectionFChange(event: vscode.TextEditorSelectionChangeEvent) {
       const actualCurrentLine = editor.selection.active.line;
 
       if (highlightedLineF !== null && highlightedLineF !== actualCurrentLine) {
-        vscode.commands.executeCommand(
-          "vscodeVimEnhanced.removeEnhanceFKeyHighlight"
-        );
+        handleRemoveFHighlight();
       }
     }, 0);
 
@@ -450,6 +416,13 @@ function subscribeToVimEvents(api: VimAPI, context: vscode.ExtensionContext) {
         outputChannel.appendLine("No active editor found.");
       }
     }
+
+    if (editor) {
+      const position = editor.selection.active;
+      const lineNumber = position.line;
+      currLine = lineNumber;
+    }
+
     isRelativeLineNumbersShown = !isRelativeLineNumbersShown;
   });
 
@@ -472,25 +445,4 @@ export function deactivate() {
     outputChannel.appendLine("Vim Enhanced Extension Deactivated.");
     outputChannel.dispose();
   }
-}
-function toggleShowRelativeLineNumber() {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor) {
-    return;
-  }
-
-  const position = editor.selection.active;
-  const lineNumber = position.line;
-  currLine = lineNumber;
-
-  if (isRelativeLineNumbersShown) {
-    vCharHighlighter.clearRelativeLineNumbers(editor);
-  } else {
-    vCharHighlighter.showRelativeLineNumbers(
-      editor,
-      editor.selection.active.line,
-      decorationConfig
-    );
-  }
-  isRelativeLineNumbersShown = !isRelativeLineNumbersShown;
 }
